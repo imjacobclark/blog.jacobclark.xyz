@@ -16,7 +16,7 @@
 
       <div class="trigger">
         <a class="page-link" href="https://www.jacob.uk.com">Homepage</a>
-        <a class="page-link" href="https://www.blog.jacob.uk.com">Blog</a>
+        <a class="page-link" href="https://blog.jacob.uk.com">Blog</a>
         {% for my_page in site.pages %}
           {% if my_page.title %}
           <a class="page-link" href="{{ my_page.url | prepend: site.baseurl }}">{{ my_page.title | escape }}</a>
