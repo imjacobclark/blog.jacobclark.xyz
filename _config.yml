@@ -17,7 +17,7 @@ title: Jacob Clark
 email: jacob.jh.clark@googlemail.com
 description: "Blogging on software, the modern web, technology and architecture!"
 baseurl: "" # the subpath of your site, e.g. /blog
-url: "https://blog.jacob.uk.com" # the base hostname & protocol for your site
+url: "https://blog.jacobclark.xyz" # the base hostname & protocol for your site
 twitter_username: imjacobclark
 github_username:  imjacobclark
 permalink: /:title
