@@ -1,2 +1,2 @@
-# blog.jacob.uk.com
+# blog.jacobclark.xyz
 My blog

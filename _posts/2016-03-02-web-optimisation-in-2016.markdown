@@ -83,7 +83,7 @@ Instead you should be leveraging [server push](https://tools.ietf.org/html/rfc75
 
 For example: when a client requests 'index.html', the web server is configured to say: *"Hey, you want index.html? Okay, but you're going to need app.js too!"*. 
 
-Server push however doesn't break the prioritisation features of HTTP/2. I talk more about sever push in my article [HTTP/2 and content delivery](https://blog.jacob.uk.com/http-2-and-content-delivery/).
+Server push however doesn't break the prioritisation features of HTTP/2. I talk more about sever push in my article [HTTP/2 and content delivery](https://blog.jacobclark.xyz/http-2-and-content-delivery/).
 
 #### Stop serving assets from multiple domains.
 
@@ -99,6 +99,6 @@ HTTP/2 will help you simplify your build process, give you more control over how
 
 HTTP/2 however is not a silver bullet to simplify your build chain, continue to minify your resources where possible - the smaller the file the smaller the download. Continue to leverage browser caching, reduce DNS lookups and always make sure you use a CDN for static resources that change infrequently.
  
-If you'd like to go further and find out more about the inner workings of HTTP/2, you can do so in my blog post: [HTTP/2 and content delivery](https://blog.jacob.uk.com/http-2-and-content-delivery/), if you'd then like to implement a HTTP/2 web server, I outlined how to go about that using Node.js in my article [HTTP/2 with Node.js](https://blog.jacob.uk.com/http-2-with-node-js/)
+If you'd like to go further and find out more about the inner workings of HTTP/2, you can do so in my blog post: [HTTP/2 and content delivery](https://blog.jacobclark.xyz/http-2-and-content-delivery/), if you'd then like to implement a HTTP/2 web server, I outlined how to go about that using Node.js in my article [HTTP/2 with Node.js](https://blog.jacobclark.xyz/http-2-with-node-js/)
 
-Visit my [website](https://www.jacob.uk.com), follow me on [Twitter](https://twitter.com/imjacobclark) and [GitHub](https://github.com/imjacobclark) or view my professional background on [LinkedIn](https://uk.linkedin.com/in/imjacobclark).
+Visit my [website](https://www.jacobclark.xyz), follow me on [Twitter](https://twitter.com/imjacobclark) and [GitHub](https://github.com/imjacobclark) or view my professional background on [LinkedIn](https://uk.linkedin.com/in/imjacobclark).

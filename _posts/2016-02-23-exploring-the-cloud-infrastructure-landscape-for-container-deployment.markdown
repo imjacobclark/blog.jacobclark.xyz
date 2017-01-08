@@ -9,7 +9,7 @@ Cloud provider tools also emerged such as CloudFormation by Amazon Web Services 
 
 The above examples have high amounts of vendor lock-in, which can be an issue for some development teams, company policies and even data protection. So now we find ourselves asking the question, how do I architect my own cloud infrastructure?
 
-The past few years have seen the relentless rise of container engines from [Docker](https://www.docker.com/), [lmctfy](https://github.com/google/lmctfy) and [LXC](https://linuxcontainers.org/), if you're unfamiliar with what a container is, my recent article [Microservices and Containers distilled](https://blog.jacob.uk.com/microservices-architecture-and-containers-distilled/) will be a useful read at this stage, the article also covers Microservices, an architecture pattern for building fine-grained application components which also fit directly into the context of this article.
+The past few years have seen the relentless rise of container engines from [Docker](https://www.docker.com/), [lmctfy](https://github.com/google/lmctfy) and [LXC](https://linuxcontainers.org/), if you're unfamiliar with what a container is, my recent article [Microservices and Containers distilled](https://blog.jacobclark.xyz/microservices-architecture-and-containers-distilled/) will be a useful read at this stage, the article also covers Microservices, an architecture pattern for building fine-grained application components which also fit directly into the context of this article.
 
 Containers allow us to build our applications into consistently portable environments, cross operating systems, data centres and even container engines themselves. This article will focus on exploring how to achieving a highly available cloud infrastructure leveraging container technology.
 
@@ -70,4 +70,4 @@ It's clear we are overwhelmed with choice right now for building production read
 
 CoreOS and mesosphere both offer complete solutions to application deployment through containers, commercial support and some heavyweight cloud supplier backing.
 
-Visit my [website](https://www.jacob.uk.com), follow me on [Twitter](https://twitter.com/imjacobclark) and [GitHub](https://github.com/imjacobclark) or view my professional background on [LinkedIn](https://uk.linkedin.com/in/imjacobclark).
+Visit my [website](https://www.jacobclark.xyz), follow me on [Twitter](https://twitter.com/imjacobclark) and [GitHub](https://github.com/imjacobclark) or view my professional background on [LinkedIn](https://uk.linkedin.com/in/imjacobclark).

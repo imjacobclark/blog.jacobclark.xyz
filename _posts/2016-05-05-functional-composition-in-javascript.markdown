@@ -129,4 +129,4 @@ Clearly functional composition provides us with an interface to write cleaner an
 
 Given the new features and syntactic sugar brought in by ES6/7 - I find functional composition sits nicely as a utility function in any web application.
 
-Visit my [website](https://www.jacob.uk.com), follow me on [Twitter](https://twitter.com/imjacobclark) and [GitHub](https://github.com/imjacobclark) or view my professional background on [LinkedIn](https://uk.linkedin.com/in/imjacobclark).
+Visit my [website](https://www.jacobclark.xyz), follow me on [Twitter](https://twitter.com/imjacobclark) and [GitHub](https://github.com/imjacobclark) or view my professional background on [LinkedIn](https://uk.linkedin.com/in/imjacobclark).

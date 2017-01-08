@@ -346,4 +346,4 @@ There are some topics that I have not covered in this post such as merges, tags,
 
 The [git documentation](https://git-scm.com/documentation) is fantastic and I highly encourage you to read the 'Git Internals - Plumbing and Porcelain' parts.
 
-Visit my [website](https://www.jacob.uk.com), follow me on [Twitter](https://twitter.com/imjacobclark) and [GitHub](https://github.com/imjacobclark) or view my professional background on [LinkedIn](https://uk.linkedin.com/in/imjacobclark).
+Visit my [website](https://www.jacobclark.xyz), follow me on [Twitter](https://twitter.com/imjacobclark) and [GitHub](https://github.com/imjacobclark) or view my professional background on [LinkedIn](https://uk.linkedin.com/in/imjacobclark).
