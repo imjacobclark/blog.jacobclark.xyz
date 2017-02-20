@@ -50,7 +50,7 @@ def print_values(array):
 
 If we were to change the input to an array of different size, our print statement would be exercised more or less depending on the size of that input. 
 
-If we were to put this into an arithmetic expression, we would get `1+5`, using intuition we know that the 5 is variable on the input size, if we call the input size `n`, we would now have the expression `1+n`.
+If we were to put this into an arithmetic expression, we would get `5+1`, using intuition we know that the 5 is variable on the input size, if we call the input size `n`, we would now have the expression `n+1`.
 
 I could now argue that the worst case running time for `print_values` is `O(n+1)`. `n` for the loop block and `1` for the print statement. Clearly this is oversimplified and taken at face value as I'm not _really_ interested in _how_ this code is being executed under the hood, I just care about the operations defined solely within my above function.
 
