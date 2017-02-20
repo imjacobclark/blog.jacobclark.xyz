@@ -150,4 +150,6 @@ There are some fantastic resources on the web to further your understanding on a
 * [Asymptotic Nota* tions - Learn X in Y](https://learnxinyminutes.com/docs/asymptotic-notation/)
 * [Khan Academy - Algorithms](https://www.khanacademy.org/computing/computer-science/algorithms)
 
+Found something inaccurate or incorrect, [please submit a pull request](https://github.com/imjacobclark/blog.jacobclark.xyz/blob/master/_posts/2017-02-20-proving-big-o.markdown) all improvements will be attributed accordingly. 
+
 Visit my [website](https://www.jacobclark.xyz), follow me on [Twitter](https://twitter.com/imjacobclark) and [GitHub](https://github.com/imjacobclark) or view my professional background on [LinkedIn](https://uk.linkedin.com/in/imjacobclark).
