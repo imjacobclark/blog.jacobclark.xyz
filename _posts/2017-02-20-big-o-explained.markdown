@@ -1,9 +1,9 @@
 ---
 layout: post
-title: Proving Big-O
+title: Big-O Explained
 date: 2017-02-20 00:12:11.000000000 +00:00
 ---
-# Proving Big-O
+# Big-O Explained
  
 Asymptotic notation is a set of languages which allows us to express the performance of our algorithm in relation to their input.
 
