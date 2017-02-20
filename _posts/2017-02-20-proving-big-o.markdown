@@ -147,9 +147,9 @@ Suppose our constant `c` is still `1`, our expression would now be __3 <= 3 * 3^
 There are some fantastic resources on the web to further your understanding on asymptotic notation, here are a few:
 
 * [Big Oh Notation (and Omega and Theta) (Video)](https://www.youtube.com/watch?v=ei-A_wy5Yxw&list=PL1BaGV1cIH4UhkL8a9bJGG356covJ76qN&index=2)
-* [Asymptotic Nota* tions - Learn X in Y](https://learnxinyminutes.com/docs/asymptotic-notation/)
+* [Asymptotic Notations - Learn X in Y](https://learnxinyminutes.com/docs/asymptotic-notation/)
 * [Khan Academy - Algorithms](https://www.khanacademy.org/computing/computer-science/algorithms)
 
-Found something inaccurate or incorrect, [please submit a pull request](https://github.com/imjacobclark/blog.jacobclark.xyz/blob/master/_posts/2017-02-20-proving-big-o.markdown) all improvements will be attributed accordingly. 
+Found something inaccurate or incorrect, [please submit a pull request](https://github.com/imjacobclark/blog.jacobclark.xyz/blob/master/_posts/2017-02-20-proving-big-o.markdown), all improvements will be attributed accordingly. 
 
 Visit my [website](https://www.jacobclark.xyz), follow me on [Twitter](https://twitter.com/imjacobclark) and [GitHub](https://github.com/imjacobclark) or view my professional background on [LinkedIn](https://uk.linkedin.com/in/imjacobclark).
