@@ -3,9 +3,9 @@ layout: post
 title: Big-O Explained
 date: 2017-02-20 00:12:11.000000000 +00:00
 ---
-# Big-O Explained
- 
-Asymptotic notation is a set of languages which allows us to express the performance of our algorithm in relation to their input.
+# Big-O Notation
+
+Asymptotic notation is a set of languages which allows us to express the performance of our algorithms in relation to their input.
 
 There are three main notations for expressing the performance of code, put simply they are: 
 
@@ -151,7 +151,6 @@ There are some fantastic resources on the web to further your understanding on a
 * [Khan Academy - Algorithms](https://www.khanacademy.org/computing/computer-science/algorithms)
 * [Big-O cheatsheet](http://bigocheatsheet.com/)
 
-Found something inaccurate or incorrect, [please submit a pull request](https://github.com/imjacobclark/blog.jacobclark.xyz/blob/master/_posts/2017-02-20-proving-big-o.markdown), all improvements will be attributed accordingly. 
+Found something inaccurate or incorrect, [please submit a pull request](https://github.com/imjacobclark/blog.jacobclark.xyz/blob/master/_posts/2017-02-20-big-o-explained.markdown), all improvements will be attributed accordingly. 
 
 Visit my [website](https://www.jacobclark.xyz), follow me on [Twitter](https://twitter.com/imjacobclark) and [GitHub](https://github.com/imjacobclark) or view my professional background on [LinkedIn](https://uk.linkedin.com/in/imjacobclark).
-
