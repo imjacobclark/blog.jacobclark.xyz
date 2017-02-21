@@ -38,7 +38,7 @@ Maybe, but what if you run it again, three times, write down your results and th
 
 This is where asymptotic notations are important. They provide us with a mathematical foundation for representing the running times of our algorithms consistently. 
 
-We create this consitencey by talking about operations our code has to perform. Operations such as array lookups, print statements and variable assignments. 
+We create this consistency by talking about operations our code has to perform. Operations such as array lookups, print statements and variable assignments. 
 
 If we were to annotate `print_values` with the amount of times each line within the function is executed for the input `[1, 2, 3, 4, 5]`, we would have something as follows:
 
@@ -149,7 +149,9 @@ There are some fantastic resources on the web to further your understanding on a
 * [Big Oh Notation (and Omega and Theta) (Video)](https://www.youtube.com/watch?v=ei-A_wy5Yxw&list=PL1BaGV1cIH4UhkL8a9bJGG356covJ76qN&index=2)
 * [Asymptotic Notations - Learn X in Y](https://learnxinyminutes.com/docs/asymptotic-notation/)
 * [Khan Academy - Algorithms](https://www.khanacademy.org/computing/computer-science/algorithms)
+* [Big-O cheatsheet](http://bigocheatsheet.com/)
 
 Found something inaccurate or incorrect, [please submit a pull request](https://github.com/imjacobclark/blog.jacobclark.xyz/blob/master/_posts/2017-02-20-proving-big-o.markdown), all improvements will be attributed accordingly. 
 
 Visit my [website](https://www.jacobclark.xyz), follow me on [Twitter](https://twitter.com/imjacobclark) and [GitHub](https://github.com/imjacobclark) or view my professional background on [LinkedIn](https://uk.linkedin.com/in/imjacobclark).
+
