@@ -5,19 +5,19 @@ date: 2017-02-20 00:12:11.000000000 +00:00
 ---
 # Big-O Notation
 
-Asymptotic notation is a set of languages which allows us to express the performance of our algorithms in relation to their input.
+Asymptotic notation is a set of languages which allow us to express the performance of our algorithms in relation to their input.
 
-There are three main notations for expressing the performance of code, put simply they are: 
+There are three main notations for expressing the performance of algorithms, put simply they are: 
 
 * Big-O - The worst case (upper bound).
 * Big Omega - The best case (lower bound).
 * Theta - The upper and lower bounds.
 
-In this post I'm going to focus on how we can prove Big-O - as we often want to plan for the worst case running time rather than the best.
+In this post I'm going to focus on how we can prove Big-O - as we often want to plan for the worst case running time of software, rather than the best.
 
 ## Big-O through code
 
-Lets take the following Python example which takes an array, iterates over it and prints each value of the array:
+Lets take the following Python example which takes an array, iterates over it and prints each value of that array:
 
 ```
 def print_values(array):
@@ -36,7 +36,7 @@ print(end - start)
 
 Maybe, but what if you run it again, three times, write down your results and then move to another machine with a higher spec and run it another three times. I bet upon comparison of the results you will get different running times! 
 
-This is where asymptotic notations are important. They provide us with a mathematical foundation for representing the running times of our algorithms consistently. 
+This is where asymptotic notations are important. They provide us with a mathematical foundation for representing the running time of our algorithms consistently. 
 
 We create this consistency by talking about operations our code has to perform. Operations such as array lookups, print statements and variable assignments. 
 
@@ -48,7 +48,7 @@ def print_values(array):
     	print i # Execution count: 1
 ```
 
-If we were to change the input to an array of different size, our print statement would be exercised more or less depending on the size of that input. 
+If we were to change the input to an array of a different size, our print statement would be exercised more or less, depending on the size of that input. 
 
 If we were to put this into an arithmetic expression, we would get `5+1`, using intuition we know that the 5 is variable on the input size, if we call the input size `n`, we would now have the expression `n+1`.
 
@@ -89,7 +89,7 @@ We can now say when `n` is `1`: __1 <= 1 * 1 for 1 > 0__ is true. We know this b
 
 The above must be true for all values of `n` greater than `k` _(0)_, so if `n` was `10`: __10 <= 1 * 10 for 10 > 0__ is also true.
 
-What we're basically saying here is that no matter our input (`n`), it must be greater than or equal to our constant (`c`) when the size of our input (`n`) is more than another constant value (`k`, in our case the iteration count of the function).
+What we're basically saying here is that no matter our input (`n`), it must be greater than or equal to our constant (`c`) when the size of our input (`n`) is more than another constant value (`k`), in our case the iteration count of the function).
 
 But where do our constants come from? Well they are just values, we typically start at 1 and work our way up to seek a constant which makes the expression __f(n) <= c * g(n) for all n > k__ true. If we cannot find such combination of constants, then our code does not have a running time of `O(n)` and our hypothesise was incorrect.
 
