@@ -43,7 +43,7 @@ jacobclark
 
 This isn’t very useful for us trying to understand what's happening under the hood, the code above is just doing several external functional calls.
 
-Interestingly enough, whoami is simply just a wrapper around two other very important functions which are provided by **glicb**, or in other words, a c library. 
+Interestingly enough, whoami is simply just a wrapper around two other very important functions which are provided by **glibc**, or in other words, a c library. 
 
 These c libraries essentially wrap system call functions (to the kernel) and provide access to utilities such as open, printf, etc.
 
