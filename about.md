@@ -18,4 +18,5 @@ I specialise in:
 * Legacy service transformation and decommissioning into modern digital solutions
 * New business and product development from MVP to maintainable software and enterprise architectures
 * Business transformation (re-branding, re-launching & process improvement)
-* Other skills and interests include agile, emerging software development techniques, client side frameworks, server side frameworks, relational/non-relational database systems, continuous integration/delivery, testing, version control & devops.
+
+Other skills and interests include agile, emerging software development techniques, client side frameworks, server side frameworks, relational/non-relational database systems, continuous integration/delivery, testing, version control & devops.
