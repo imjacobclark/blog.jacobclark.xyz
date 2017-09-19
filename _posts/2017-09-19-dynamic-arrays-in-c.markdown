@@ -3,8 +3,6 @@ layout: post
 title: Dynamic Arrays in C
 date: 2017-08-19 09:21:11.000000000 +00:00
 ---
-#Dynamic Arrays in C
-
 If you’re from a dynamic programming language such as JavaScript or Ruby, working with Arrays in C might seem a little weird.
 
 ## Introduction
