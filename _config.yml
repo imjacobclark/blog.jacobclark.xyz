@@ -15,7 +15,7 @@
 # in the templates via {{ site.myvariable }}.
 title: Jacob Clark - Blog
 email: jacob.jh.clark@googlemail.com
-description: "Experienced technologist and polyglot software engineer currently working at Co-op Digital, specialising in the engineering and architecture of modern digital services."
+description: "Experienced technologist and polyglot software engineer currently working at the BBC."
 baseurl: "" # the subpath of your site, e.g. /blog
 url: "https://blog.jacobclark.xyz/" # the base hostname & protocol for your site
 twitter_username: imjacobclark
