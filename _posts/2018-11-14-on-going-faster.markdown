@@ -49,6 +49,6 @@ Sometimes deadlines are simply impossible to meet - if you can’t move the dead
 
 Inspect and adapt at regular intervals. Don’t wait for a retrospective - talk to your team and stakeholders daily. Fix things when they are broken, don't get stuck in a rut because that's how things have always been. 
 
-Shipping software is an art - as Douglas Adams once said - " Ilove deadlines. I like the whooshing sound they make as they fly by." [Source: GoodReads](https://www.goodreads.com/quotes/1398-i-love-deadlines-i-love-the-whooshing-noise-they-make).
+Shipping software is an art - as Douglas Adams once said - "I love deadlines. I like the whooshing sound they make as they fly by." [Source: GoodReads](https://www.goodreads.com/quotes/1398-i-love-deadlines-i-love-the-whooshing-noise-they-make).
 
 The next time you’re pressured into meeting that deadline - don’t ask “how can I get the team to go faster?” - ask (your team) “what is slowing the team down”.
