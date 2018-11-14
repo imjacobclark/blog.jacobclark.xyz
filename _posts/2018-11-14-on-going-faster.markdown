@@ -35,7 +35,7 @@ You may find some of the below themes come out during your conversation:
 If you find the responses from your team do not conclude anything fruitful, or you're met with a response of “huh, we’re confident we will deliver!” you may want to: 
 
 * Ensure the team have an understanding of the amount of work you'd ideally like to have completed  
-* Talk about the work to be completed as a team in a dedicated session- taking through work can often lead to team members thoughtfully considering the work to be done
+* Talk about the work to be completed as a team in a dedicated session- talking through work can often lead to team members thoughtfully considering the work to be done
 * Be honest about your concerns - quantify your thoughts and provide tangible observed evidence during conversations where possible
 
 Sometimes deadlines are simply impossible to meet - if you can’t move the deadline or you’re reading this post to find out how you could work smarter, you could: 
