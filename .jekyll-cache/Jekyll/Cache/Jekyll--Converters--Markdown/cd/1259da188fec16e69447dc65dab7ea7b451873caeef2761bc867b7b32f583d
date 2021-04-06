@@ -1,0 +1,319 @@
+I"kL<p>Let’s talk about some of the internals of git and how it stores and tracks objects within the <code class="language-plaintext highlighter-rouge">.git</code> directory.</p>
+
+<p>If you’re unaware of what the <code class="language-plaintext highlighter-rouge">.git</code> directory is, it’s simply a space that git uses to store your repositories data, the directory is created when you run <code class="language-plaintext highlighter-rouge">git init</code>. Information such as binary objects and plain text files for commits and commit data, remote server information and information about branch locations are stored within.</p>
+
+<p>The key concept throughout this entire article is very simple - pretty much every operation you do in git creates objects with a bunch of metadata which point to some more objects with a bunch of metadata and so on so for forth. That’s pretty much it.</p>
+
+<h3 id="git-plumbing">Git Plumbing</h3>
+
+<p>First, create a new directory and initialise it as a new git project.</p>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span><span class="nb">mkdir </span>git <span class="o">&amp;&amp;</span> <span class="nb">cd </span>git
+<span class="nv">$ </span>git init
+</code></pre></div></div>
+
+<p>We can now take a look at the <code class="language-plaintext highlighter-rouge">.git</code> directory and the contents within it.</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ tree .git
+.git
+|___branches
+|___config
+|___description
+___HEAD
+|___hooks
+| |___applypatch-msg.sample
+| |___commit-msg.sample
+| |___post-update.sample
+| |___pre-applypatch.sample
+| |___pre-commit.sample
+| |___pre-push.sample
+| |___pre-rebase.sample
+| |___prepare-commit-msg.sample
+| |___update.sample
+|___info
+| |___exclude
+|___objects
+| |___info
+| |___pack
+|___refs
+| |___heads
+| |___tags
+</code></pre></div></div>
+
+<p>For the moment most of the directories git created are empty. This is because we haven’t begun tracking any files or directories yet.</p>
+
+<p>Under the hood git is nothing more than a key-value store, it takes a file and compresses it and then stores it against its computed SHA1 as a binary object.</p>
+
+<p>Git has a low level plumbing command called <code class="language-plaintext highlighter-rouge">hash-object</code>.</p>
+
+<p><a href="https://git-scm.com/docs/git-hash-object">hash-object</a> will take something and compute its object ID. For example we can compute the object ID of the string ‘Hello World’.</p>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span><span class="nb">echo</span> <span class="s2">"Hello World"</span> | git hash-object <span class="nt">--stdin</span>
+557db03de997c86a4a028e1ebd3a1ceb225be238
+</code></pre></div></div>
+
+<p>You can try this on your machine and you should see the exact same output as above.</p>
+
+<p>When we ask git to track a file this is exactly what happens in order to compute an ID to store the information against.</p>
+
+<p>We can take this command one step further and ask git to take the string “Hello World” and store it as an object within its object store.</p>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span><span class="nb">echo</span> <span class="s2">"Hello World"</span> | git hash-object <span class="nt">--stdin</span> <span class="nt">-w</span>
+557db03de997c86a4a028e1ebd3a1ceb225be238
+</code></pre></div></div>
+
+<p>Now if we look at our .git directory tree again we will see some additional files and directories.</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ tree .git
+.git
+|___branches
+|___config
+|___description
+|___HEAD
+|___hooks
+| |___applypatch-msg.sample
+| |___commit-msg.sample
+| |___post-update.sample
+| |___pre-applypatch.sample
+| |___pre-commit.sample
+| |___pre-push.sample
+| |___pre-rebase.sample
+| |___prepare-commit-msg.sample
+| |___update.sample
+|___info
+| |___exclude
+|___objects
+| |___55
+| | |___7db03de997c86a4a028e1ebd3a1ceb225be238
+| |___info
+| |___pack
+|___refs
+| |___heads
+| |___tags
+</code></pre></div></div>
+
+<p>We can see that under the <code class="language-plaintext highlighter-rouge">objects</code> directory a new subdirectory has been created: <code class="language-plaintext highlighter-rouge">55</code> with an object of id <code class="language-plaintext highlighter-rouge">7db03de997c86a4a028e1ebd3a1ceb225be238</code> stored within, note that the first two characters of the SHA1 are omitted from the object files name.</p>
+
+<p>As I said earlier, git stores every object against its computed SHA1, to make the directory structure a little simpler, git takes the first two characters of the SHA1 and uses it as the directory for the object.</p>
+
+<p>If we recall, our “Hello World” strings computed SHA1 was <code class="language-plaintext highlighter-rouge">557db03de997c86a4a028e1ebd3a1ceb225be238</code> which means the directory named <code class="language-plaintext highlighter-rouge">55</code> should be our string “Hello World”. We can verify this using the <code class="language-plaintext highlighter-rouge">cat-file</code> command.</p>
+
+<p><a href="https://git-scm.com/docs/git-cat-file">cat-file</a> is a git plumming command that can display the content, type and size of objects within gits object store.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ git cat-file 557db03de997c86a4a028e1ebd3a1ceb225be238 -p
+Hello World
+</code></pre></div></div>
+
+<p>That’s git at it’s lowest level, you’ll almost never use those commands directly in your day to day use of git.</p>
+
+<h3 id="commits">Commits</h3>
+
+<p>Let’s create some files and directories.</p>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span><span class="nb">mkdir </span>docs
+<span class="nv">$ </span><span class="nb">touch </span>README.md 
+<span class="nv">$ </span><span class="nb">echo</span> <span class="s2">"Hello World"</span> <span class="o">&gt;&gt;</span> README.md
+</code></pre></div></div>
+
+<p>If we do a <code class="language-plaintext highlighter-rouge">git status</code> now we should see several untracked files.</p>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>git status
+On branch master
+
+Initial commit
+
+Untracked files:
+  <span class="o">(</span>use <span class="s2">"git add &lt;file&gt;..."</span> to include <span class="k">in </span>what will be committed<span class="o">)</span>
+
+	README.md
+	docs/
+
+nothing added to commit but untracked files present <span class="o">(</span>use <span class="s2">"git add"</span> to track<span class="o">)</span>
+</code></pre></div></div>
+
+<p>Let’s fix that by staging and checking in our new files.</p>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>git add <span class="nb">.</span>
+<span class="nv">$ </span>git commit <span class="nt">-m</span> <span class="s1">'Add README and Docs'</span>
+</code></pre></div></div>
+
+<p>If we run a <code class="language-plaintext highlighter-rouge">git log</code> we should see our new commit with a SHA1 to represent it.</p>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>git log
+commit b82828ed05ef076db09118994c7c036708973b40
+Author: Jacob Clark &lt;jacob.clark@&gt;
+Date:   Sat Mar 19 00:40:04 2016 +0000
+
+    Add README and Docs
+</code></pre></div></div>
+
+<p>The SHA1 above <code class="language-plaintext highlighter-rouge">b82828ed05ef076db09118994c7c036708973b40</code> is simply a pointer to an object where git stores the information about that commit.</p>
+
+<p>If we view the contents of the <code class="language-plaintext highlighter-rouge">.git</code> directory now, we should see several extra objects being stored for the files we have just committed.</p>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>tree .git
+.git
+|___branches
+|___COMMIT_EDITMSG
+|___config
+|___description
+|___HEAD
+|___hooks
+| |___applypatch-msg.sample
+| |___commit-msg.sample
+| |___post-update.sample
+| |___pre-applypatch.sample
+| |___pre-commit.sample
+| |___pre-push.sample
+| |___pre-rebase.sample
+| |___prepare-commit-msg.sample
+| |___update.sample
+|___index
+|___info
+| |___exclude
+|___logs
+| |___HEAD
+| |___refs
+| | |___heads
+| | | |___master
+|___objects
+| |___55
+| | |___7db03de997c86a4a028e1ebd3a1ceb225be238
+| |___66
+| | |___801fba9ba0350874eb1f64b87b6cdb609da859
+| |___76
+| | |___ebb0f0fd6dfc00be4631fd7019d55536f38ea8
+| |___b8
+| | |___2828ed05ef076db09118994c7c036708973b40
+| |___info
+| |___pack
+|___refs
+| |___heads
+| | |___master
+| |___tags
+</code></pre></div></div>
+
+<p>We can see there are now four objects stored. One might think that is a little strange. We already had our “Hello World” object stored to begin with, we know that git stored our commit as an object and we just checked in three new objects (two text files and a directory), so that <em>should</em> leave us with 5 objects in the store, lets look at why that isn’t the case.</p>
+
+<p>Take a look at our commit object by running <code class="language-plaintext highlighter-rouge">git cat-file b82828ed05ef076db09118994c7c036708973b40 -p</code>.</p>
+
+<p>The SHA1 of your commit will be different to mine as a timestamp is used to calculate it, so just substitute the one above for the one in your <code class="language-plaintext highlighter-rouge">git log</code>.</p>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>git cat-file b82828ed05ef076db09118994c7c036708973b40 <span class="nt">-p</span>
+tree 66801fba9ba0350874eb1f64b87b6cdb609da859
+author Jacob Clark &lt;jacob.clark@&gt; 1458348004 +0000
+committer Jacob Clark &lt;jacob.clark@&gt; 1458348004 +0000
+
+Add README and Docs
+</code></pre></div></div>
+
+<p>So here we can see git has stored a bunch of information about the commit we just performed, the tree SHA1, the author, committer and the message.</p>
+
+<p>Lets take a look at the tree object, again your SHA1 will be different.</p>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>git cat-file 66801fba9ba0350874eb1f64b87b6cdb609da859 <span class="nt">-p</span>
+100644 blob 557db03de997c86a4a028e1ebd3a1ceb225be238	README.md
+040000 tree 76ebb0f0fd6dfc00be4631fd7019d55536f38ea8	docs
+</code></pre></div></div>
+
+<p>A tree is like a directory, it holds several objects, in <code class="language-plaintext highlighter-rouge">.git</code> you’re either looking at a tree or an object. A directory in your filesystem is a one to one mapping with a tree in git.</p>
+
+<p>As I said right at the beginning of this article pretty much everything in git is a pointer. Within this commit we can see two pointers, one to an object and one to a tree. We can see both of these pointers corelate to exactly what we checked in earlier - a <code class="language-plaintext highlighter-rouge">README.md</code> file (now an object) and a directory named <code class="language-plaintext highlighter-rouge">docs</code> (now a tree).</p>
+
+<p>The text inside our <code class="language-plaintext highlighter-rouge">README.md</code> file was simply “Hello World”, this object was already stored in gits object store at the time we checked in our <code class="language-plaintext highlighter-rouge">README.md</code> file, and if we look at the SHA1 listed above we can see it is exactly the same as the SHA1 from the “Hello World” string we manually put into gits object store earlier.</p>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>git cat-file 557db03de997c86a4a028e1ebd3a1ceb225be238 <span class="nt">-p</span>
+Hello World
+</code></pre></div></div>
+
+<p>Git won’t track anything it doesn’t need too. Git is intelligent in knowing what it has tracked and what it hasn’t, the SHA1 of two identical strings will never change. There was no reason for git to create a second object in the store for the exact same string and SHA1 that we checked in earlier. Instead git simply just created a pointer to it from the commit metadata we saw earlier.</p>
+
+<p>These types of optimisations is what keeps the performance of git high and alleviates unnecessary storage of objects taking up disk space which just are not needed, which is why we only saw 4 new objects and not 5 earlier.</p>
+
+<h3 id="branches">Branches</h3>
+
+<p>A branch is no different than a commit - it is simply a pointer to a commit within a repository (the HEAD).</p>
+
+<p>Git stores branch information within plain text files in the <code class="language-plaintext highlighter-rouge">.git/refs/heads</code> directory, git creates a branch by default called <code class="language-plaintext highlighter-rouge">master</code> which is represented by a file called <code class="language-plaintext highlighter-rouge">master</code> within this directory.</p>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span><span class="nb">cat</span> .git/refs/heads/master
+b82828ed05ef076db09118994c7c036708973b40
+</code></pre></div></div>
+
+<p>This SHA1 is the pointer to the current location of the branch (the HEAD), if we run a <code class="language-plaintext highlighter-rouge">git log</code> we can see that the SHA1 above is exactly the same as the single commit we just created because that is our current location within that branch.</p>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>git log
+commit b82828ed05ef076db09118994c7c036708973b40
+Author: Jacob Clark &lt;jacob.clark@g&gt;
+Date:   Sat Mar 19 00:40:04 2016 +0000
+
+    Add README and Docs
+</code></pre></div></div>
+
+<p>If we create a new branch called <code class="language-plaintext highlighter-rouge">hello-moon</code> git will begin tracking the location of the branch within <code class="language-plaintext highlighter-rouge">.git/refs/heads/hello-moon</code>.</p>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>git checkout <span class="nt">-b</span> hello-moon
+Switched to a new branch <span class="s1">'hello-moon'</span>
+<span class="nv">$ </span><span class="nb">cat</span> .git/refs/heads/hello-moon
+b82828ed05ef076db09118994c7c036708973b40
+</code></pre></div></div>
+
+<p>The above SHA1 is still the same as the <code class="language-plaintext highlighter-rouge">master</code> SHA1 because we haven’t changed the location of the branch yet.</p>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span><span class="nb">touch </span>hello-moon.txt
+<span class="nv">$ </span>git add <span class="nb">.</span>
+<span class="nv">$ </span>git commit <span class="nt">-m</span> <span class="s1">'Add hello moon'</span>
+<span class="o">[</span>hello-moon 683d9df] Add hello moon
+ 1 file changed, 0 insertions<span class="o">(</span>+<span class="o">)</span>, 0 deletions<span class="o">(</span>-<span class="o">)</span>
+ create mode 100644 hello-moon.txt
+</code></pre></div></div>
+
+<p>Now git has tracked the new commit and the new file we will now have a new location for the branch <code class="language-plaintext highlighter-rouge">hello-moon</code>.</p>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span><span class="nb">cat</span> .git/refs/heads/hello-moon
+683d9df7e5c7247c4606c86e21c84f89e9a575bb
+</code></pre></div></div>
+
+<p>We can do a <code class="language-plaintext highlighter-rouge">git cat-file</code> on this SHA1 to see where this branch is now pointing too.</p>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>git cat-file 683d9df7e5c7247c4606c86e21c84f89e9a575bb <span class="nt">-p</span>                                                                                <span class="o">(</span>hello-moon<span class="o">)</span> 
+tree 0a1b6bbf04e5d9448994cae4b5a2cb7eff14302a
+parent b82828ed05ef076db09118994c7c036708973b40
+author Jacob Clark &lt;jacob.jh.clark@googlemail.com&gt; 1458386031 +0000
+committer Jacob Clark &lt;jacob.jh.clark@googlemail.com&gt; 1458386031 +0000
+
+Add hello moon
+</code></pre></div></div>
+
+<p>As we expect - it’s pointing to our ‘Add hello moon’ commit with one new addition, this commit has a parent, every commit in Git has a parent (unless it is the first commit on a branch), parents are how git tracks the history of its objects, if we <code class="language-plaintext highlighter-rouge">git cat-file</code> the parent we can see it is the initial commit we made on the master branch.</p>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>git cat-file b82828ed05ef076db09118994c7c036708973b40 <span class="nt">-p</span>                                                                                <span class="o">(</span>hello-moon<span class="o">)</span> 
+tree 66801fba9ba0350874eb1f64b87b6cdb609da859
+author Jacob Clark &lt;jacob.jh.clark@googlemail.com&gt; 1458348004 +0000
+committer Jacob Clark &lt;jacob.jh.clark@googlemail.com&gt; 1458348004 +0000
+
+Add README and Docs
+</code></pre></div></div>
+
+<p>If we decided on this branch we no longer want the ‘Add hello moon’ commit we could ask git to reset the branch back to a particular commit.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ git reset --hard b82828ed05ef076db09118994c7c036708973b40
+HEAD is now at b82828e Add README and Docs
+</code></pre></div></div>
+
+<p>Now if we cat the branch file one last time we will see we are back to where we first started.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ cat .git/refs/heads/hello-moon                                                                                                          (hello-moon) 
+b82828ed05ef076db09118994c7c036708973b40
+</code></pre></div></div>
+
+<p>In conclusion a branch is <em>literally</em> just a file which points to a particular commits SHA1, nothing more.</p>
+
+<h3 id="conclusion">Conclusion</h3>
+
+<p>There are some topics that I have not covered in this post such as merges, tags, remotes and what HEAD actually is. I’ll be covering these concepts and the above in more detail in a future post.</p>
+
+<p>The <a href="https://git-scm.com/documentation">git documentation</a> is fantastic and I highly encourage you to read the ‘Git Internals - Plumbing and Porcelain’ parts.</p>
+
+<p>Visit my <a href="https://www.jacobclark.xyz">website</a>, follow me on <a href="https://twitter.com/imjacobclark">Twitter</a> and <a href="https://github.com/imjacobclark">GitHub</a> or view my professional background on <a href="https://uk.linkedin.com/in/imjacobclark">LinkedIn</a>.</p>
+:ET

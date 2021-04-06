@@ -1,0 +1,54 @@
+I"�<h2 id="introduction">Introduction</h2>
+
+<p>Let’s talk about the GNU core utilities.</p>
+
+<p>You probably use them every day in your development activities. <strong>cat</strong>, <strong>mv</strong>, <strong>yes</strong> and <strong>whoami</strong>, just to name a few.</p>
+
+<p>They’re vital in getting things done and being productive on the command line, but how do they work under the hood?</p>
+
+<p>In this post I’m going to talk about <strong>whoami</strong>, infact, we’re going to dive right into the implementation, and talk about how it works, under the hood.</p>
+
+<p>To start with, it might be worthwhile browsing the Git repository over on <a href="https://github.com/coreutils/coreutils/tree/master/src">GitHub</a> to get a feel of all the programs that make up coreutils.</p>
+
+<h2 id="whoami">whoami</h2>
+
+<p><code class="language-plaintext highlighter-rouge">whoami</code>, a simple utility which displays the effective username of the person operating command. It’s worth noting whoami has been made obsolete by id, but for the purpose of this post, it’s useful, and a simple introduction on how coreutils work under the hood.</p>
+
+<p>If we take a look at the <a href="https://github.com/coreutils/coreutils/blob/master/src/whoami.c">source</a> for whoami, it comes in at 91 lines, 91 lines of code to figure out which user is invoking that command. However, a lot of these lines are simply setup functions and commands for the GNU system as a whole, we can actually remove these and see that the actual minimal code for this program comes in at a mere 9 lines of code:</p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">#include &lt;stdio.h&gt;
+#include &lt;unistd.h&gt;
+#include &lt;pwd.h&gt;
+</span>
+<span class="kt">int</span> <span class="nf">main</span> <span class="p">(){</span>
+ <span class="n">uid_t</span> <span class="n">id</span> <span class="o">=</span> <span class="n">geteuid</span><span class="p">();</span>
+ <span class="k">struct</span> <span class="n">passwd</span> <span class="o">*</span><span class="n">pwd</span> <span class="o">=</span> <span class="n">getpwuid</span><span class="p">(</span><span class="n">id</span><span class="p">);</span>
+ <span class="n">puts</span> <span class="p">(</span><span class="n">pwd</span><span class="o">-&gt;</span><span class="n">pw_name</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>Go ahead, if you’re on a unix like system, compile this and run it, you should see your username printed to screen!</p>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span>jacobclark:~/Desktop]<span class="nv">$ </span>gcc whoami.c <span class="nt">-o</span> <span class="nb">whoami</span>
+<span class="o">[</span>jacobclark:~/Desktop]<span class="nv">$ </span>./whoami
+jacobclark
+</code></pre></div></div>
+
+<p>This isn’t very useful for us trying to understand what’s happening under the hood, the code above is just doing several external functional calls.</p>
+
+<p>Interestingly enough, whoami is simply just a wrapper around two other very important functions which are provided by <strong>glibc</strong>, or in other words, a c library.</p>
+
+<p>These c libraries essentially wrap system call functions (to the kernel) and provide access to utilities such as open, printf, etc.</p>
+
+<p>So, GNU coreutils for whoami is simply a wrapper of wrappers, taking two very different functions, one for getting the current users id, and another for taking an arbitrary ID and returning the users name, making whoami one very useful program.</p>
+
+<p>The majority of these wrapper functions are defined in the Open Group unix specification, infact, both wrapper functions we use <strong>geteuid</strong> and <strong>getpwuid</strong> are defined in this specification.</p>
+
+<p>geteuid: <a href="http://pubs.opengroup.org/onlinepubs/009695399/functions/geteuid.html">http://pubs.opengroup.org/onlinepubs/009695399/functions/geteuid.html</a></p>
+
+<p>getpwuid: <a href="http://pubs.opengroup.org/onlinepubs/009695399/functions/getpwuid.html">http://pubs.opengroup.org/onlinepubs/009695399/functions/getpwuid.html</a></p>
+
+<p>Happy hacking.</p>
+
+<p>Visit my <a href="https://www.jacobclark.xyz">website</a>, follow me on <a href="https://twitter.com/imjacobclark">Twitter</a> and <a href="https://github.com/imjacobclark">GitHub</a> or view my professional background on <a href="https://uk.linkedin.com/in/imjacobclark">LinkedIn</a>.</p>
+:ET

@@ -1,0 +1,164 @@
+I"pA<p>HTTP/2 with Node.js Let’s take a crash course on how we can build HTTP/2 ready applications in Node.js.</p>
+
+<p>Firstly, many clients and browsers are not planning on implementing the ability to use HTTP/2 over plain-text, even though this is in the protocols specification. This notion comes as a wider community effort to move towards a more secure and encrypted internet by default.</p>
+
+<p>For us however, this means if we intend on using HTTP/2 in production, we must supply a valid TLS certificate!</p>
+
+<p>If you wish to use a valid TLS certificate which is signed by an authority and not self signed, I recommend <a href="https://letsencrypt.org/">Let’s Encrypt</a>, a free, automated and open certificate authority!</p>
+
+<p>For the purpose of this guide, we’re going to be using self-signed certificates, feel free to replace these steps with a certificate you have acquired from Let’s Encrypt (or another certificate authority).</p>
+
+<p>This is the real nitty gritty stuff of openssl, let’s quickly zip past it and get ourselves a certificate.</p>
+
+<h2 id="generating-a-tls-certificate">Generating a TLS certificate</h2>
+
+<p>Create a new project directory and assuming you have openssh installed, lets generate a 2048 bit private key for our server, note that we specify the key passphrase as <code class="language-plaintext highlighter-rouge">x</code> using the flag <code class="language-plaintext highlighter-rouge">-passout pass:x</code>:</p>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span><span class="nb">mkdir </span>node-http <span class="o">&amp;&amp;</span> <span class="nb">cd </span>node-http
+<span class="nv">$ </span>openssl genrsa <span class="nt">-des3</span> <span class="nt">-passout</span> pass:x <span class="nt">-out</span> server.pass.key 2048
+</code></pre></div></div>
+
+<p>We now need to remove the passphrase from this key so it can be loaded into our HTTP server, we then remove the original key:</p>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>openssl rsa <span class="nt">-passin</span> pass:x <span class="nt">-in</span> server.pass.key <span class="nt">-out</span> server.key
+<span class="nv">$ </span><span class="nb">rm </span>server.pass.key
+</code></pre></div></div>
+
+<p>Now we need to generate the certificate signing request in order to validate who we are (even though we are self signing the certificate, we must present a CSR), you’ll be prompted for information such as your country whereabouts, name, organisation details and common name, enter these as appropriate:</p>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>openssl req <span class="nt">-new</span> <span class="nt">-key</span> server.key <span class="nt">-out</span> server.csr
+</code></pre></div></div>
+
+<p>Finally, we can (self) sign our certificate:</p>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>openssl x509 <span class="nt">-req</span> <span class="nt">-days</span> 365 <span class="nt">-in</span> server.csr <span class="nt">-signkey</span> server.key <span class="nt">-out</span> server.crt
+</code></pre></div></div>
+
+<p>You now should have three extra files within the node-http2 directory:</p>
+
+<ul>
+  <li>server.crt — Your new TLS certificate</li>
+  <li>server.key — Your TLS certificate private key</li>
+  <li>server.csr — Your TLS certificate signing request</li>
+</ul>
+
+<p>Now we have our certificates ready, we can move on to writing a basic HTTP/2 node server.</p>
+
+<p>We’re going to be using the mature node library <a href="https://github.com/indutny/node-spdy">node-spdy</a> in this article.</p>
+
+<p>It’s worth noting, Express 5.0 will eventually have HTTP/2 support out the box, although there is uncertainty within the community as to when Express 5.0 will be released, Koa also has HTTP/2 support from additional middleware.</p>
+
+<p>Whilst spdy is being deprecated, node-spdy has a fantastic API and full support for HTTP/2 and fallback to HTTPS, so there is currently no reason not to use it in production.</p>
+
+<p>Building our HTTP/2 node server Let’s start by installing the npm module:</p>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>npm <span class="nb">install </span>spdy
+</code></pre></div></div>
+
+<p>Create an app.js file and require spdy and fs:</p>
+
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="dl">'</span><span class="s1">use strict</span><span class="dl">'</span><span class="p">;</span>
+
+<span class="kd">let</span> <span class="nx">spdy</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="dl">'</span><span class="s1">spdy</span><span class="dl">'</span><span class="p">),</span>
+    <span class="nx">fs</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="dl">'</span><span class="s1">fs</span><span class="dl">'</span><span class="p">);</span>
+</code></pre></div></div>
+
+<p>We will need to provide some basic configuration to spdy, to start with we will simply specify the locations of the certificate and private key we just created:</p>
+
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">let</span> <span class="nx">options</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="na">key</span><span class="p">:</span> <span class="nx">fs</span><span class="p">.</span><span class="nx">readFileSync</span><span class="p">(</span><span class="nx">__dirname</span> <span class="o">+</span> <span class="dl">'</span><span class="s1">/server.key</span><span class="dl">'</span><span class="p">),</span>
+    <span class="na">cert</span><span class="p">:</span> <span class="nx">fs</span><span class="p">.</span><span class="nx">readFileSync</span><span class="p">(</span><span class="nx">__dirname</span> <span class="o">+</span> <span class="dl">'</span><span class="s1">/server.crt</span><span class="dl">'</span><span class="p">)</span>
+<span class="p">};</span>
+</code></pre></div></div>
+
+<p>Finally we can create our basic HTTP/2 server:</p>
+
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">spdy</span><span class="p">.</span><span class="nx">createServer</span><span class="p">(</span><span class="nx">options</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">req</span><span class="p">,</span> <span class="nx">res</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">res</span><span class="p">.</span><span class="nx">writeHead</span><span class="p">(</span><span class="mi">200</span><span class="p">);</span>
+    <span class="nx">res</span><span class="p">.</span><span class="nx">end</span><span class="p">(</span><span class="dl">'</span><span class="s1">Hello world over HTTP/2</span><span class="dl">'</span><span class="p">);</span>
+<span class="p">}).</span><span class="nx">listen</span><span class="p">(</span><span class="mi">3000</span><span class="p">);</span>
+</code></pre></div></div>
+
+<p>Putting all this together:</p>
+
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="dl">'</span><span class="s1">use strict</span><span class="dl">'</span><span class="p">;</span>
+
+<span class="kd">let</span> <span class="nx">spdy</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="dl">'</span><span class="s1">spdy</span><span class="dl">'</span><span class="p">),</span>
+    <span class="nx">fs</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="dl">'</span><span class="s1">fs</span><span class="dl">'</span><span class="p">);</span>
+    
+<span class="kd">let</span> <span class="nx">options</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="na">key</span><span class="p">:</span> <span class="nx">fs</span><span class="p">.</span><span class="nx">readFileSync</span><span class="p">(</span><span class="nx">__dirname</span> <span class="o">+</span> <span class="dl">'</span><span class="s1">/server.key</span><span class="dl">'</span><span class="p">),</span>
+    <span class="na">cert</span><span class="p">:</span> <span class="nx">fs</span><span class="p">.</span><span class="nx">readFileSync</span><span class="p">(</span><span class="nx">__dirname</span> <span class="o">+</span> <span class="dl">'</span><span class="s1">/server.crt</span><span class="dl">'</span><span class="p">)</span>
+<span class="p">};</span>
+
+<span class="nx">spdy</span><span class="p">.</span><span class="nx">createServer</span><span class="p">(</span><span class="nx">options</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">req</span><span class="p">,</span> <span class="nx">res</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">res</span><span class="p">.</span><span class="nx">writeHead</span><span class="p">(</span><span class="mi">200</span><span class="p">);</span>
+    <span class="nx">res</span><span class="p">.</span><span class="nx">end</span><span class="p">(</span><span class="dl">'</span><span class="s1">Hello world over HTTP/2</span><span class="dl">'</span><span class="p">);</span>
+<span class="p">}).</span><span class="nx">listen</span><span class="p">(</span><span class="mi">3000</span><span class="p">);</span>
+</code></pre></div></div>
+
+<p>Here we have created HTTP/2 server which responds with ‘Hello world over HTTP/2’ in the streams ‘body’ frame.</p>
+
+<p>Head over to https://localhost:3000 (note https), you should be presented with a certificate warning error stating it is not trusted, this is because we self-signed our certificate and your browser is warning you that the certificate is not signed by a trusted authority, accept the warning and continue anyway.</p>
+
+<p>If all is well, you should see:</p>
+
+<p><img src="/images/hello-world.png" alt="" /></p>
+
+<p>If we inspect the Chrome network tab, we can see the protocol has been listed as H2, confirming we are infact viewing the webpage over HTTP/2:</p>
+
+<p><img src="/images/localhost-h2.png" alt="" /></p>
+
+<h2 id="http2-server-push">HTTP/2 Server Push</h2>
+
+<p>Server-Push is the ability for HTTP/2 enabled web servers to push content back to the client in a single request without the browser requesting it first.</p>
+
+<p>Clearly this functionality reduces the amount of overhead for the browser in having to request content back and forth, instead we specify it in our server configuration and forget about it.</p>
+
+<p>node-spdy allows us to programmatically specify pushed content as follows:</p>
+
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">let</span> <span class="nx">spdy</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="dl">'</span><span class="s1">spdy</span><span class="dl">'</span><span class="p">),</span>
+    <span class="nx">fs</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="dl">'</span><span class="s1">fs</span><span class="dl">'</span><span class="p">);</span>
+
+<span class="kd">let</span> <span class="nx">options</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="na">key</span><span class="p">:</span> <span class="nx">fs</span><span class="p">.</span><span class="nx">readFileSync</span><span class="p">(</span><span class="nx">__dirname</span> <span class="o">+</span> <span class="dl">'</span><span class="s1">/server.key</span><span class="dl">'</span><span class="p">),</span>
+    <span class="na">cert</span><span class="p">:</span>  <span class="nx">fs</span><span class="p">.</span><span class="nx">readFileSync</span><span class="p">(</span><span class="nx">__dirname</span> <span class="o">+</span> <span class="dl">'</span><span class="s1">/server.crt</span><span class="dl">'</span><span class="p">)</span>
+<span class="p">};</span>
+
+<span class="nx">spdy</span><span class="p">.</span><span class="nx">createServer</span><span class="p">(</span><span class="nx">options</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">req</span><span class="p">,</span> <span class="nx">res</span><span class="p">)</span> <span class="p">{</span>
+    <span class="kd">let</span> <span class="nx">stream</span> <span class="o">=</span> <span class="nx">res</span>
+        <span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="dl">'</span><span class="s1">/main.js</span><span class="dl">'</span><span class="p">,</span> <span class="p">{</span>
+            <span class="na">request</span><span class="p">:</span> <span class="p">{</span>
+                <span class="na">accept</span><span class="p">:</span> <span class="err">‘</span><span class="o">*</span><span class="sr">/</span><span class="se">\*</span><span class="err">’
+</span>            <span class="p">},</span>
+            <span class="na">response</span><span class="p">:</span> <span class="p">{</span>
+                <span class="dl">'</span><span class="s1">content-type</span><span class="dl">'</span><span class="p">:</span> <span class="dl">'</span><span class="s1">application/javascript</span><span class="dl">'</span>
+            <span class="p">}</span>
+        <span class="p">})</span>
+        <span class="p">.</span><span class="nx">end</span><span class="p">(</span><span class="dl">'</span><span class="s1">console.log("Hello World");</span><span class="dl">'</span><span class="p">);</span>
+    
+    <span class="nx">res</span><span class="p">.</span><span class="nx">writeHead</span><span class="p">(</span><span class="mi">200</span><span class="p">);</span>
+    <span class="nx">res</span><span class="p">.</span><span class="nx">end</span><span class="p">(</span><span class="dl">'</span><span class="s1">&lt;script src="/main.js"&gt;&lt;/script&gt;</span><span class="dl">'</span><span class="p">);</span>
+<span class="p">}).</span><span class="nx">listen</span><span class="p">(</span><span class="mi">3000</span><span class="p">);</span>
+</code></pre></div></div>
+
+<p>Start the application again, this time inspecting the JavaScript console in your browser, you should see:</p>
+
+<p><img src="/images/helloworld-console.png" alt="" /></p>
+
+<p>We can verify this was pushed by opening up Chrome internals for HTTP/2: chrome://net-internals/#http2, locating localhost:3000 and observing the active streams and unclaimed pushes columns at 1. You may also drill down into this information further and inspect exactly what happened during the request/response cycle by clicking the ID URL.</p>
+
+<p><img src="/images/http2-sessions.png" alt="" /></p>
+
+<p>HTTP/2 operates on a concept of requests, streams and frames, every request that HTTP/2 responds too opens a series of streams for each message that needs to be sent to the client, each stream is split up into separate frames, there are several frame types including: data, headers, priority, push_promise and several others.</p>
+
+<p>The frame we define above is a push_promise, this informs the client of some data it will receive at some point in the future, when the client will receive this data is calculated by many HTTP/2 prioritisation factors which I’m not covering in this guide.</p>
+
+<p>We specify a filename for the stream, request and response attributes including content type and accept policies and we end the stream with the actual body, this could be a file from the file system, for simplicity it’s just an inline console.log in this example, this console.log will be delivered and executed on the client</p>
+
+<p>We also updated our servers response body to reference the script we are pushing from the server so the browser knows to execute it.</p>
+
+<p>There we have it, the foundations of a HTTP/2 node application.</p>
+
+<p>Visit my <a href="https://www.jacobclark.xyz">website</a>, follow me on <a href="https://twitter.com/imjacobclark">Twitter</a> and <a href="https://github.com/imjacobclark">GitHub</a> or view my professional background on <a href="https://uk.linkedin.com/in/imjacobclark">LinkedIn</a>.</p>
+:ET

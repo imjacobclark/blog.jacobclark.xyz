@@ -1,0 +1,123 @@
+I"�5<p>Functional composition - the art of taking one function and applying it to the result of another.</p>
+
+<p>Let’s take a look at a pretty standard JavaScript example to start with and work our way to refactoring it into functional composition.</p>
+
+<p>Below we have a few functions which take inputs and produce outputs:</p>
+
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">let</span> <span class="nx">double</span> <span class="o">=</span> <span class="nx">number</span> <span class="o">=&gt;</span> <span class="nx">number</span> <span class="o">*</span> <span class="mi">2</span><span class="p">;</span>
+<span class="kd">let</span> <span class="nx">triple</span> <span class="o">=</span> <span class="nx">number</span> <span class="o">=&gt;</span> <span class="nx">number</span> <span class="o">*</span> <span class="mi">3</span><span class="p">;</span>
+<span class="kd">let</span> <span class="nx">quadruple</span> <span class="o">=</span> <span class="nx">number</span> <span class="o">=&gt;</span> <span class="nx">number</span> <span class="o">*</span> <span class="mi">4</span><span class="p">;</span>
+<span class="kd">let</span> <span class="nx">number</span> <span class="o">=</span> <span class="mi">5</span><span class="p">;</span> 
+
+<span class="nx">number</span> <span class="o">=</span> <span class="nx">double</span><span class="p">(</span><span class="nx">number</span><span class="p">);</span>
+<span class="nx">number</span> <span class="o">=</span> <span class="nx">triple</span><span class="p">(</span><span class="nx">number</span><span class="p">);</span>
+<span class="nx">number</span> <span class="o">=</span> <span class="nx">quadruple</span><span class="p">(</span><span class="nx">number</span><span class="p">);</span>
+
+<span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">number</span><span class="p">)</span> <span class="c1">// =&gt; 120</span>
+
+</code></pre></div></div>
+
+<p>Something doesn’t sit quite right with me about this code. I’m not particularly fond of the multiple variable reassignments, it feels a little hard to read.</p>
+
+<p>We could potentially refactor the above into the following:</p>
+
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">let</span> <span class="nx">double</span> <span class="o">=</span> <span class="nx">number</span> <span class="o">=&gt;</span> <span class="nx">number</span> <span class="o">*</span> <span class="mi">2</span><span class="p">;</span>
+<span class="kd">let</span> <span class="nx">triple</span> <span class="o">=</span> <span class="nx">number</span> <span class="o">=&gt;</span> <span class="nx">number</span> <span class="o">*</span> <span class="mi">3</span><span class="p">;</span>
+<span class="kd">let</span> <span class="nx">quadruple</span> <span class="o">=</span> <span class="nx">number</span> <span class="o">=&gt;</span> <span class="nx">number</span> <span class="o">*</span> <span class="mi">4</span><span class="p">;</span>
+<span class="kd">let</span> <span class="nx">number</span> <span class="o">=</span> <span class="mi">5</span><span class="p">;</span> 
+
+<span class="nx">number</span> <span class="o">=</span> <span class="nx">quadruple</span><span class="p">(</span><span class="nx">triple</span><span class="p">(</span><span class="nx">double</span><span class="p">(</span><span class="mi">5</span><span class="p">)));</span>
+
+<span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">number</span><span class="p">)</span> <span class="c1">// =&gt; 120</span>
+
+</code></pre></div></div>
+
+<p>However, nesting function calls as arguments doesn’t sit quite right with me either, what if I wanted to be able to quintuple pentadruple my numbers and so on so forth?</p>
+
+<p>We could refactor the above methods to return themselves so we can chain methods - a common design pattern known as the builder:</p>
+
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">let</span> <span class="nx">NumberCruncherBuilder</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">numberToCrunch</span><span class="p">)</span> <span class="p">{</span>
+  <span class="kd">let</span> <span class="nx">num</span> <span class="o">=</span> <span class="nx">numberToCrunch</span><span class="p">;</span>
+   
+  <span class="k">return</span> <span class="p">{</span>
+      <span class="na">double</span><span class="p">:</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+        <span class="nx">num</span> <span class="o">=</span> <span class="nx">num</span> <span class="o">*</span> <span class="mi">2</span><span class="p">;</span>
+        <span class="k">return</span> <span class="k">this</span><span class="p">;</span>
+      <span class="p">},</span>
+      <span class="na">triple</span><span class="p">:</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+        <span class="nx">num</span> <span class="o">=</span> <span class="nx">num</span> <span class="o">*</span> <span class="mi">3</span><span class="p">;</span>
+        <span class="k">return</span> <span class="k">this</span><span class="p">;</span>
+      <span class="p">},</span>
+      <span class="na">quadruple</span><span class="p">:</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+        <span class="nx">num</span> <span class="o">=</span> <span class="nx">num</span> <span class="o">*</span> <span class="mi">4</span><span class="p">;</span>
+        <span class="k">return</span> <span class="k">this</span><span class="p">;</span>
+      <span class="p">},</span>
+      <span class="na">build</span><span class="p">:</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="nx">num</span>
+  <span class="p">};</span>
+<span class="p">};</span>
+
+<span class="kd">let</span> <span class="nx">numberCruncher</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">NumberCruncherBuilder</span><span class="p">(</span><span class="mi">5</span><span class="p">);</span>
+<span class="kd">let</span> <span class="nx">number</span> <span class="o">=</span> <span class="nx">numberCruncher</span><span class="p">.</span><span class="nx">double</span><span class="p">().</span><span class="nx">triple</span><span class="p">().</span><span class="nx">quadruple</span><span class="p">().</span><span class="nx">build</span><span class="p">();</span>
+
+<span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">number</span><span class="p">)</span> <span class="c1">// =&gt; 120</span>
+
+</code></pre></div></div>
+
+<p>Whilst this is a fine example of utilising the builder pattern to overlay syntactic sugar on top of variable reassignment - it still doesn’t feel quite right - we’ve had to go down the instantiation route to ensure our builder has the right scope attached to <code class="language-plaintext highlighter-rouge">this</code> which ultimately increases overhead.</p>
+
+<p>Our functions are now all coupled into this one builder too - we could abstract them out but that’s even more complexity… plus we now have a somewhat stateful function too as we construct the builder with the initial value that will be built upon, muddying up the readability of our code and making our initial solution seem much simpler (whilst far less scalable).</p>
+
+<p>The next example is functional composition in pure JavaScript - many utility/functional JavaScript libraries include the same functionality - lodash for example has a functional composition method called <a href="https://lodash.com/docs#flow">_.flow</a>.</p>
+
+<p>The below example is technically named a pipe as it reduces the functions left to right (like a unix pipe) - we could use <code class="language-plaintext highlighter-rouge">reduceRight</code> instead on our spread operator which would reduce the functions right to left in a more functional manor.</p>
+
+<p>Functional composition will simply pass a value into a function, take the returned value of that function and pass it along - it will do this until there are no further functions it can pass the value along to - finally returning the end value.</p>
+
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">let</span> <span class="nx">double</span> <span class="o">=</span> <span class="nx">number</span> <span class="o">=&gt;</span> <span class="nx">number</span> <span class="o">*</span> <span class="mi">2</span><span class="p">;</span>
+<span class="kd">let</span> <span class="nx">triple</span> <span class="o">=</span> <span class="nx">number</span> <span class="o">=&gt;</span> <span class="nx">number</span> <span class="o">*</span> <span class="mi">3</span><span class="p">;</span>
+<span class="kd">let</span> <span class="nx">quadruple</span> <span class="o">=</span> <span class="nx">number</span> <span class="o">=&gt;</span> <span class="nx">number</span> <span class="o">*</span> <span class="mi">4</span><span class="p">;</span>
+<span class="kd">let</span> <span class="nx">compose</span> <span class="o">=</span> <span class="p">(...</span><span class="nx">funcs</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">(</span><span class="nx">value</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="nx">funcs</span><span class="p">.</span><span class="nx">reduce</span><span class="p">((</span><span class="nx">v</span><span class="p">,</span><span class="nx">fn</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="nx">fn</span><span class="p">(</span><span class="nx">v</span><span class="p">),</span> <span class="nx">value</span><span class="p">);</span>
+
+<span class="c1">// Arguments are read right to left</span>
+<span class="c1">// double -&gt; triple -&gt; quadruple</span>
+<span class="kd">let</span> <span class="nx">crunchNumber</span> <span class="o">=</span> <span class="nx">compose</span><span class="p">(</span>
+    <span class="nx">double</span><span class="p">,</span>
+    <span class="nx">triple</span><span class="p">,</span>
+    <span class="nx">quadruple</span>
+<span class="p">);</span>
+
+<span class="kd">let</span> <span class="nx">number</span> <span class="o">=</span> <span class="nx">crunchNumber</span><span class="p">(</span><span class="mi">5</span><span class="p">);</span>
+
+<span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">number</span><span class="p">);</span>
+</code></pre></div></div>
+
+<p>To start - we declare our functions as per the first couple of solutions, however in this solution we also declare a utility function called <code class="language-plaintext highlighter-rouge">compose</code>. Let’s un-crazy that function and break it down:</p>
+
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// Declare a function, take functions as arguments</span>
+<span class="kd">let</span> <span class="nx">compose</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(...</span><span class="nx">funcs</span><span class="p">){</span> 
+
+    <span class="c1">// Return a new function which takes a value</span>
+    <span class="k">return</span> <span class="kd">function</span><span class="p">(</span><span class="nx">value</span><span class="p">){</span>
+
+        <span class="c1">// Reduce &amp; iterate the initial argument spread (an array of functions)</span>
+        <span class="k">return</span> <span class="nx">funcs</span><span class="p">.</span><span class="nx">reduce</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">val</span><span class="p">,</span> <span class="kd">function</span><span class="p">){</span>
+
+            <span class="c1">// Take the function, call it, passing in the value and return the output</span>
+            <span class="k">return</span> <span class="kd">function</span><span class="p">(</span><span class="nx">val</span><span class="p">)</span>
+
+        <span class="c1">// Pass the value into the reduce to be passed into the function to call</span>
+        <span class="p">},</span> <span class="nx">value</span><span class="p">);</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>To finish - we call the compose function, passing in all the functions we wish to be ‘composed’ of one another - this returns another function in which we pass the value we want to be passed into the first function.</p>
+
+<p>Functional composition won’t affect your code testability either as it’s purely generic and not interested in any specific implementation detail.</p>
+
+<p>Clearly functional composition provides us with an interface to write cleaner and more succinct code - without additional overhead and complexity other approaches can introduce.</p>
+
+<p>Given the new features and syntactic sugar brought in by ES6/7 - I find functional composition sits nicely as a utility function in any web application.</p>
+
+<p>Visit my <a href="https://www.jacobclark.xyz">website</a>, follow me on <a href="https://twitter.com/imjacobclark">Twitter</a> and <a href="https://github.com/imjacobclark">GitHub</a> or view my professional background on <a href="https://uk.linkedin.com/in/imjacobclark">LinkedIn</a>.</p>
+:ET

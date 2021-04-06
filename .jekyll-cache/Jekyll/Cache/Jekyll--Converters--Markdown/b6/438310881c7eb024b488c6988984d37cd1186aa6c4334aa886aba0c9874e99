@@ -1,0 +1,79 @@
+I"�<p>Microservices architectures have taken off dramatically over the recent years and newly emerging technologies such as CoreOS, Docker, Mesophere and Digital Ocean are making it easier than ever before to build highly available, fault tolerant and scalable enterprise ready applications on the fly.</p>
+
+<p>This article is aimed at those who have heard the terms microservices and containers mentioned about the office but are overwhelmed by the vast amount of whitepapers out there by companies such as Netflix. I hope this article will serve as a digestible amount of theoretical information as well as some technical on how you can start building scalable applications at Facebook quality without the overhead, cost or infrastructure.</p>
+
+<h2 id="what-is-a-microservices-architecture">What is a microservices architecture?</h2>
+
+<p>Simply put, an application that follows the microservices architecture pattern is simply a system that is logically split up into several smaller systems designed to communicate over standardised protocols such as REST or lightweight message queuing.</p>
+
+<p>Here are the main points I feel explain what a microservices architecture is, and why it’s important:</p>
+
+<ul>
+  <li>
+    <p>Applications designed as a suite of small services opposed to monolithic codebases</p>
+  </li>
+  <li>
+    <p>Such services are easy to scale, distributed across data centres and geo-locations allowing for fault tolerance and high availability</p>
+  </li>
+  <li>
+    <p>Microservices should be designed with failure in mind</p>
+  </li>
+  <li>
+    <p>Easier to automate deployments allowing for continuous delivery</p>
+  </li>
+  <li>
+    <p>Code and applications are independent and de-centralised, not tying developers or operations to a particular stack, framework or language</p>
+  </li>
+  <li>
+    <p>All services are de-coupled and should implement where possible a standard communication protocol such as a RESTful interface or message queue for communication with other parts of the application</p>
+  </li>
+</ul>
+
+<p>There are a huge amount of positives that come with a microservices architecture for developers and the dev-ops culture, easier deployments, the ability to throw pieces of an application out and replace it with a different stack, improved scalability and ability to achieve continuous delivery, however, with these positives come negatives too, and a microservices architecture isn’t a bed of roses.</p>
+
+<p>It’s important to understand your technical resources on-hand before designing a microservices architecture, and this is where we would normally start talking about the dev-ops movement and the forever decreasing divide between developers and operations, but I’m going to leave that for another article.</p>
+
+<p>However, this isn’t the full story, a more in-depth explanation on microservices by Martin Fowler can be found <a href="http://martinfowler.com/articles/microservices.html">here</a>.</p>
+
+<h2 id="what-is-a-container">What is a container?</h2>
+
+<p>In a nutshell, a container is a way to package an application, move it around environments and deploy it anywhere a container engine is present!</p>
+
+<p>Containers are an alternative to hypverised virtualisation environments and fit very well into most cloud deployment architectures.
+Containers are:</p>
+
+<ul>
+  <li>
+    <p>A lightweight environment for running applications</p>
+  </li>
+  <li>
+    <p>Bundled applications running within isolated environments upon the same kernel in their own userspace</p>
+  </li>
+  <li>
+    <p>Portable cross environments, for example a container can be pushed from several developers laptops through int, test and live and stay consistent throughout</p>
+  </li>
+  <li>
+    <p>Isolated resources which do not interfere wither other running containers on the same kernel</p>
+  </li>
+</ul>
+
+<p>Already we can see the advantages of using containers, they’re cheaper — spinning up several cloud instances to host multiple applications is expensive and time consuming, containers can be spun up in a single VM and run side-by-side with very little overhead.</p>
+
+<p>Environments are consistent and reproducible cross host environments. Resource utilisation can be limited and monitored with ease, allowing for better scalability.</p>
+
+<p>As with everything, there are downsides to using containers, they are not full protection from security threats, a containers process and resources are isolated, however, you should continue to secure your applications as you would if they were deployed onto a bare metal OS. Many container engines do not follow a standard, it is hard to migrate from one container engine to another once your choice has been made.</p>
+
+<p>There are a vast number of discussions around the web focusing on Containers opposed to Virtualisation, <a href="http://blog.smartbear.com/web-monitoring/why-containers-instead-of-hypervisors/">here</a> is just one of many.</p>
+
+<h2 id="running-a-microservices-architecture-on-containers">Running a microservices architecture on containers</h2>
+
+<p>The philosophy of microservices emphasises on small, scalable applications that are reliable, easy to deploy, scale and maintain.</p>
+
+<p>Virtualised infrastructures running automation tools such as Puppet (or even shell scripting) can be unreliable, in-consistent and expensive.</p>
+
+<p>Container based solutions are a great choice for deploying microservices on, they can be clustered and many container deployment environments support automatic service discovery for the addition of new resources to a cluster as well as automatic failover.</p>
+
+<p>Containers can also be deployed on a wide variety of environments, from Platform as a Service, to cloud server instances or even dedicated servers running traditional GNU/Linux distributions.</p>
+
+<p>Visit my <a href="https://www.jacobclark.xyz">website</a>, follow me on <a href="https://twitter.com/imjacobclark">Twitter</a> and <a href="https://github.com/imjacobclark">GitHub</a> or view my professional background on <a href="https://uk.linkedin.com/in/imjacobclark">LinkedIn</a>.</p>
+:ET

@@ -1,0 +1,17 @@
+I"�<p>I find electronics fascinating, there is just something about building circuits from basic components that is extremely satisfying.</p>
+
+<p>In this post I want to talk about a particular circuit which I’ve recently put together on some protoboard, it’s an astable multivibrator, or in other words, two leds flashing. I find it particularly interesting as it’s basically an oscillator/clock/timer without any ICs such as the 555.</p>
+
+<p>I’m going to discuss how the circuit works and also provide schematics on how to build the circuit too. If you do want to follow along in building this, you’ll need:</p>
+
+<ul>
+  <li>1x breadboard</li>
+  <li>2x NPN Transistors</li>
+  <li>2x 200ohm transistors</li>
+  <li>2x 1kohm transistors</li>
+  <li>2x 470 microfarad electrolytic capacitors</li>
+  <li>2x LEDs (I chose red and white, but white and blue would be cool (police lights?))</li>
+  <li>A bunch of jumper wires</li>
+  <li>1x 5v+ power supply</li>
+</ul>
+:ET

@@ -1,0 +1,130 @@
+I"+<p>If you’re from a dynamic programming language such as JavaScript or Ruby, working with Arrays in C might seem a little weird.</p>
+
+<h2 id="introduction">Introduction</h2>
+
+<h3 id="arrays-in-javascript">Arrays in JavaScript:</h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>let numbers = [];
+numbers.push(1);
+numbers.push(2);
+numbers.push(3);
+console.log(numbers); // [1, 2, 3]
+</code></pre></div></div>
+
+<p>In the above example, we created an array and added 3 numbers to it. You’ll notice we didn’t need to specify how many items we planned on putting into the array, we were able to add as many as we like.</p>
+
+<h3 id="arrays-in-c">Arrays in C:</h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>int numbers[3];
+numbers[0] = 1;
+numbers[1] = 2;
+numbers[2] = 3;
+printf("%d\n", numbers[0]); // 1
+printf("%d\n", numbers[1]); // 2
+printf("%d\n", numbers[2]); // 3
+</code></pre></div></div>
+
+<p>You’ll notice in the first line of syntax being <code class="language-plaintext highlighter-rouge">numbers[3]</code> — here we’re telling the compiler we want an array with enough memory to store three integers. We then go on to store 1, 2 and 3 at their respective indexes within our array and print them — seems simple, right? Problem here though is, we can’t add any more than 3 items to our array.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>int numbers[3];
+numbers[0] = 1;
+numbers[1] = 2;
+numbers[2] = 3;
+numbers[3] = 4;
+printf("%d\n", numbers[0]); // 1
+printf("%d\n", numbers[1]); // 2
+printf("%d\n", numbers[2]); // 3
+printf("%d\n", numbers[3]); // should be 4
+</code></pre></div></div>
+
+<p>The above example put through <code class="language-plaintext highlighter-rouge">gcc</code>:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>array.c:8:5: warning: array index 3 is past the end of the array (which contains 3 elements) [-Warray-bounds]
+</code></pre></div></div>
+
+<p>So we effectively end up with an out of bounds exception, the memory location of our array wasn’t big enough to hold any more items.</p>
+
+<p>What if we need a dynamically sized array that may hold <code class="language-plaintext highlighter-rouge">n</code> items at any one time?</p>
+
+<p>We must implement dynamically sized arrays ourselves in C. They don’t come for free within the language like they do in JavaScript, Ruby or any other dynamic programming languages. We implement them through the use of memory blocks.</p>
+
+<h3 id="malloc-realloc-and-pointers">malloc, realloc and pointers</h3>
+
+<p>In C every data type has a size — for example; on my x64 Macintosh — an integer is 4 bytes. Just by knowing this information at runtime we can create dynamically growing arrays of any size.</p>
+
+<p>We can grab the size of a type in C by doing <code class="language-plaintext highlighter-rouge">sizeof(int), sizeof(double)</code> or whatever data type you’re working with at the time, together with malloc and realloc we can create memory blocks which can grow freely in size.
+Let’s say we want to start off with the capacity to hold 3 integers, we can do this by allocating a memory block of 12 bytes:</p>
+
+<p>(Remember <code class="language-plaintext highlighter-rouge">malloc</code> only argument is the size of the memory block in bytes and that <code class="language-plaintext highlighter-rouge">malloc</code> returns a pointer to the newly created memory block.)</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>#define INITIAL_CAPACITY 3
+
+int main(){
+     int* data = malloc(INITIAL_CAPACITY * sizeof(int));
+}
+</code></pre></div></div>
+
+<p>Now we have a memory block big enough to hold our 3 integers — we need to make it dynamic! Right now, we still have the same problem where we can only place 3items into our memory block.</p>
+
+<p>If we keep track of our memory locations size and capacity — we will be able to calculate when we need to resize it!</p>
+
+<p>If our memory block is full, we can double the size of that memory block by calling <code class="language-plaintext highlighter-rouge">realloc</code> which simply expands the current memory block.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>#define INITIAL_CAPACITY 3
+
+void push(int *arr, int index, int value, int *size, int *capacity){
+     if(*size &gt; *capacity){
+          realloc(arr, sizeof(arr) * 2);
+          *capacity = sizeof(arr) * 2;
+     }
+     
+     arr[index] = value;
+     *size = *size + 1;
+}
+
+int main(){
+     int size = 0;
+     int capacity = INITIAL_CAPACITY;
+     int* arr = malloc(INITIAL_CAPACITY * sizeof(int));
+}
+</code></pre></div></div>
+
+<p>There you have it —the ability to add items to a memory block dynamically.
+If we put it all together we end up with the following program:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#define INITIAL_CAPACITY 2
+
+void push(int *arr, int index, int value, int *size, int *capacity){
+     if(*size &gt; *capacity){
+          realloc(arr, sizeof(arr) * 2);
+          *capacity = sizeof(arr) * 2;
+     }
+     arr[index] = value;
+     *size = *size + 1;
+}
+
+int main(){
+     int size = 0;
+     int capacity = INITIAL_CAPACITY;
+     int* arr = malloc(INITIAL_CAPACITY * sizeof(int));
+     push(arr, 0, 1, &amp;size, &amp;capacity);
+     push(arr, 1, 2, &amp;size, &amp;capacity);
+     push(arr, 2, 3, &amp;size, &amp;capacity);
+     
+     printf("Current capacity: %d\n", capacity); // Current capacity: 2
+     push(arr, 3, 4, &amp;size, &amp;capacity);
+     push(arr, 4, 5, &amp;size, &amp;capacity);
+     push(arr, 5, 6, &amp;size, &amp;capacity);
+ 
+     printf("Current capacity: %d\n", capacity); // Current capacity: 16
+}
+</code></pre></div></div>
+
+<p>Strictly speaking, what we have created here is a vector. A vector is a dynamically sized array with operations such as append, prepend, delete and find.</p>
+
+<p><a href="https://github.com/imjacobclark/vectorlib">Vectorlib</a> is a reasonably full implementation of a vector in C. It’s for educational purposes only, don’t use it in production.</p>
+
+<p>Visit my website, follow me on <a href="https://twitter.com/imjacobclark">Twitter</a> and <a href="https://github.com/imjacobclark">GitHub</a> or view my professional background on <a href="https://www.linkedin.com/in/imjacobclark">LinkedIn</a>.</p>
+:ET

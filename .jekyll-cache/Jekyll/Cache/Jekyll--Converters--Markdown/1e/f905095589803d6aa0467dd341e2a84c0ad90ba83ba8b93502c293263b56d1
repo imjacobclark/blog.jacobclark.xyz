@@ -1,0 +1,23 @@
+I"I	<p>USB-C is a fairly new USB standard which we’re now seeing roll out to new mobile devices.</p>
+
+<p>However many cheap (and not so cheap) cables from <a href="http://www.amazon.co.uk/s/ref=nb_sb_noss?url=search-alias%3Daps&amp;field-keywords=USB-C+to+USB-A">Amazon</a> and other online retailers are cutting corners and producing dangerous cables which could damange your device and cause electrical fire.</p>
+
+<p>These cables fail to have the correct electrical components in them to stop the client trying to draw more power than the host can provide.</p>
+
+<p>A Google engineer named <a href="https://plus.google.com/+BensonLeung">Benson Leung</a> has taken it upon himself to <a href="https://plus.google.com/collection/s0Inv">review and rate</a> USB-C cables avaiable through Amazon to help identify which cables are safe and which you should avoid.</p>
+
+<p>However there may come a time where you need to use a USB-C cable but want piece of mind that it isn’t going to destroy your phone or cause fire. I have just published an Android app to the Play Store named <a href="https://play.google.com/store/apps/details?id=jacob.uk.com.usbcheck">USBCheck</a> for this very task.</p>
+
+<p><a href="https://play.google.com/store/apps/details?id=jacob.uk.com.usbcheck">USBCheck</a> uses low level Linux driver information to detect whether the connected USB-C to USB-A cable is drawing less than 3As of power from the host (anything less than 3A is considered safe and compliant).</p>
+
+<p>The app is <a href="[USBCheck](https://play.google.com/store/apps/details?id=jacob.uk.com.usbcheck)">available on the Play Store</a> now, it’s entirley open source but currently only supports the below devices:</p>
+
+<ul>
+  <li>Huawei Nexus 6P</li>
+  <li>LG Nexus 5X</li>
+</ul>
+
+<p>The code is <a href="https://github.com/imjacobclark/USBCheck">open source on GitHub</a> and I would encourage fellow developers to contribute support for other Android devices on the market with USB-C hardware.</p>
+
+<p><a href="https://play.google.com/store/apps/details?id=jacob.uk.com.usbcheck&amp;utm_source=global_co&amp;utm_medium=prtnr&amp;utm_content=Mar2515&amp;utm_campaign=PartBadge&amp;pcampaignid=MKT-Other-global-all-co-prtnr-py-PartBadge-Mar2515-1"><img alt="Get it on Google Play" src="https://play.google.com/intl/en_us/badges/images/generic/en-play-badge.png" width="150px" /></a></p>
+:ET

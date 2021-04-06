@@ -1,0 +1,143 @@
+I"�/<p>When learning something new, having genuine data to build something useful with is usually the hardest part. So I figured I’d build a full stack project, from microcontroller through to machine learning algorithms to learn bits of AWS I haven’t touched in the past.</p>
+
+<p>I bought a bunch of electronics hardware from Aliexpress to build an IoT WiFi enabled Temperature Station. In this blog post, I’m going to outline how to build your own IoT Temperature Station and visualise/analise that data in the cloud.</p>
+
+<p>Specifically, this post will outline how to collect temperature and humidity data every 10 seconds and persist it into the cloud, using machine learning to detect anomalies in the data such as a sudden drop in temperature or temperature not rising when it is expected to do so, useful to detect a window that has been left open or the heating being accidentially turned off.</p>
+
+<p><img src="/images/serverless-iot-temperature-station/iot-temperature-station.jpg" alt="An ESP8266 with a display showing the current temperature, humidity and time" /></p>
+
+<p>I assume you have some familiarity with programming in this post, whilst what we’re going to cover isn’t particularly complex, we will use several different programming languages to achieve our end goals, including C++ (Microcontroller), JavaScript (Serverless) and Python (Machine Learning).</p>
+
+<p><img src="/images/serverless-iot-temperature-station/temperature-dashboard.png" alt="A temperature dashboard" /></p>
+
+<h2 id="high-level-architecture-overview">High level architecture overview</h2>
+
+<p>This is what we’re building end to end!</p>
+
+<p><img src="/images/serverless-iot-temperature-station/iotx-temperature-dashboard-architecture.png" alt="High level architecture overview" /></p>
+
+<h2 id="serverless-stack">Serverless stack</h2>
+
+<p>We will use <a href="http://aws.amazon.com/">Amazon Web Services (AWS)</a> for compute. If you don’t have an AWS account, set one up now.</p>
+
+<ul>
+  <li>AWS Serverless Architecture Model</li>
+  <li>API Gateway</li>
+  <li>AWS Lambda (Node.js, JavaScript)</li>
+  <li>AWS CloudWatch</li>
+  <li>AWS TimeStream</li>
+  <li>AWS SakeMaker with a Random Cut Forrest algorithm, Jupyter Notebook, Matplotlib, Numpy &amp; Pandas</li>
+</ul>
+
+<p>This architecture will cost around $1 per day to run on Amazon Web Services.</p>
+
+<h2 id="hardware-required">Hardware required</h2>
+
+<ul>
+  <li><a href="https://www.aliexpress.com/item/32665100123.html?spm=a2g0o.productlist.0.0.5372682dUP4eIP&amp;algo_pvid=963d4034-9019-4758-bf30-8b4e9656a0d7&amp;algo_expid=963d4034-9019-4758-bf30-8b4e9656a0d7-0&amp;btsid=0b0a119a16164134093905636e6c30&amp;ws_ab_test=searchweb0_0,searchweb201602_,searchweb201603_">ESP8266 development board</a> (approx £2.85 including shipping to UK)</li>
+  <li><a href="https://www.aliexpress.com/item/32517645825.html?spm=a2g0s.9042311.0.0.6c294c4dRnPTSx">AM2302 Digital Temperature Sensor</a> (approx £2.47 including shipping to the UK)</li>
+  <li><a href="https://www.aliexpress.com/item/32830523451.html?spm=a2g0s.9042311.0.0.6c294c4dRnPTSx">0.96 OLED IIC Display SSD1306</a> (approx £2.67 including shipping to the UK)</li>
+  <li><a href="https://www.aliexpress.com/item/4000203371860.html?spm=a2g0o.productlist.0.0.63054a6437RVZE&amp;algo_pvid=e41d8564-1946-49a2-98e7-aa3e1d6945eb&amp;algo_expid=e41d8564-1946-49a2-98e7-aa3e1d6945eb-0&amp;btsid=2100bdde16164137918016191e3945&amp;ws_ab_test=searchweb0_0,searchweb201602_,searchweb201603_">Male-Male Jumper Wires</a> (approx £1.63 inclusing shipping to the UK)</li>
+</ul>
+
+<p>Total cost of hardware should be approx £9.62 including shipping.</p>
+
+<p>Note: You do not need a pull-up resistor for the AM2302, it has a built in pull-up resistor.</p>
+
+<h3 id="connection-guide">Connection guide</h3>
+
+<p>Plug your ESP8266 into a breadboard along with your OLED, you’ll need <strong>4</strong> jumper wires in total along with a micro-usb cable capable of data transfer, ensure the cable isn’t just a power cable, we will use this cable to program the ESP8266.</p>
+
+<p><strong>Ground, G or GND</strong> is a reference point for all other electronic parts, it is essentially the “exit” flow for the electricity, otherwise known as 0 vaults. It is the negative part of the circuit.</p>
+
+<p><strong>3v</strong> is the positive part of the circuit, this is where the electricity flows from and what provides our power. On the ESP8266 it is rated at 3 volts. If you go on to building more elaborate circuits with the ESP8266, it is worth noting <strong>3v</strong> is not always sufficient to power certain components.</p>
+
+<h4 id="am2302">AM2302</h4>
+
+<p>Plug the red wire on the AM2302 into a <strong>3v</strong> pin and the black wire into a ground pin (abbreviated <strong>G</strong> or <strong>GND</strong>). The yellow pin should be plugged into D5.</p>
+
+<h4 id="oled-ssd1306">OLED SSD1306</h4>
+
+<p>Plug a jumper from a ground pin (abbreviated <strong>G</strong> or <strong>GND</strong>) into GND, another jumper from <strong>3v</strong> into <strong>VCC</strong> (voltage common collector, otherwise known as the positive pin in our circuit), another jumper from <strong>D1</strong> to <strong>SCL</strong> (the clock) and finally another jumper from <strong>D2</strong> into <strong>SDA</strong> (the data pin).</p>
+
+<p><strong>Clocks</strong> are used to coordinate actions within the circuit.</p>
+
+<h3 id="programming-the-esp8266">Programming the ESP8266</h3>
+
+<p>We program the ESP8266 using C++ and the Arduino IDE. The Arduino IDE is a mostly open souece, community led project with hundreds of libraries, drivers and board software, it will enable us to program our microcontroller rapidly.</p>
+
+<p>As this project involves connecting to a wireless network, making https requests, reading and writing data to external peripherals, we will use Visual Studio Code with the Arduino extension installed to enable us to write our program in a modular way so it is easy to extend (if we added more sensors, for example).</p>
+
+<p>Download and install the following software:</p>
+
+<ul>
+  <li><a href="https://www.arduino.cc/en/software">Arduino IDE</a></li>
+  <li><a href="https://code.visualstudio.com/Download">Visual Studio Code</a></li>
+  <li><a href="https://marketplace.visualstudio.com/items?itemName=vsciot-vscode.vscode-arduino">Visual Studio Code extension for Arduino</a></li>
+</ul>
+
+<p>Next you’ll need to install the correct drivers for the ESP8266, SiLabs have worked well for me on OS X. <a href="https://www.silabs.com/developers/usb-to-uart-bridge-vcp-drivers">Download them here</a>.</p>
+
+<p>Finally, we need to tell the Arduino IDE how to program the ESP8266.</p>
+
+<p>In the Arduino Menu find Preferences, there will be a field named “Additional board manager URLs”, paste <code class="language-plaintext highlighter-rouge">http://arduino.esp8266.com/stable/package_esp8266com_index.json</code> into that field and hit OK. This configures the Arduino IDE with a pointer to the instructions on how to program the ESP8266, by default the Arduino IDE only comes with the instructions on how to program Arduino Microcontrollers.</p>
+
+<p>Next, find <code class="language-plaintext highlighter-rouge">Tools -&gt; Board -&gt; Boards Manager</code>, search for ESP8266, a result named “esp8266” by “ESP8266 Community” should be returned, select the latest version and click install then close. This installs the instructions into the Arduino IDE and gives us the ability to program the ESP8266.</p>
+
+<p>We can now burn a Hello World program onto our ESP8266. Firstly, lets tell the Arduino IDE we want to program the ESP8266. <code class="language-plaintext highlighter-rouge">Tools -&gt; Board -&gt; ESP8266 Boards -&gt; NodeMCU 1.0</code>.</p>
+
+<p>Plug your ESP8266 into a USB port on your computer, again, ensure the Micro USB you’re using is capable of data transfer as well as power.</p>
+
+<p>Select the correct serial port for your ESP8266 in <code class="language-plaintext highlighter-rouge">Tools -&gt; Port -&gt; cu.wchusbserial1420</code>. The serial port is most likely named <code class="language-plaintext highlighter-rouge">cu.wchusbserial1420</code>, however, it may be different on your system, give all the options a try until you get a successful upload if required.</p>
+
+<p>Finally, we can compile and upload a program to our ESP8266.</p>
+
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">void</span> <span class="nf">setup</span><span class="p">()</span> <span class="p">{</span>
+  <span class="n">Serial</span><span class="p">.</span><span class="n">begin</span><span class="p">(</span><span class="mi">9600</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="kt">void</span> <span class="nf">loop</span><span class="p">()</span> <span class="p">{</span>
+  <span class="n">Serial</span><span class="p">.</span><span class="n">println</span><span class="p">(</span><span class="s">"Hello World"</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>At the top of the IDE, there is a tick and a right arrow. The tick is verify, this checks the program for errors, the right arrow is upload, this uploads the code onto the ESP8266.</p>
+
+<p>Hit the right arrow, once you get a success message, you can then open the serial monitor <code class="language-plaintext highlighter-rouge">Tools -&gt; Serial Monitor</code> and should see “Hello World” printed to the screen many times.</p>
+
+<p><img src="/images/serverless-iot-temperature-station/hello-world-serial.png" alt="Hello World printed to the serial monitor" /></p>
+
+<p>Congratulations, you’ve successfully programmed your ESP8266.</p>
+
+<h4 id="setup">Setup</h4>
+
+<p>The setup function runs only once when the ESP8266 boots. You should perform operations like connecting to WiFi or loading the file system here.</p>
+
+<h4 id="loop">Loop</h4>
+
+<p>The loop function is called approximately once per second, you should put your main body of code here, such as reading temperature at regular intervals or informing something that the device is still online.</p>
+
+<h2 id="reading-the-temperature">Reading the temperature</h2>
+
+<p>Before we even connect the ESP8266 to the internet, we’re going to get the temperature and humidity from the AM2302 sensor and output it to the serial monitor!</p>
+
+<p>Like with most forms of software development, we have some dependencies we need to install into Arduino in order to communicate with our temperature sensor correcrl</p>
+
+<p>Open an empty folder in Visual Studio Code. Create <code class="language-plaintext highlighter-rouge">src</code> folder and within it create another <code class="language-plaintext highlighter-rouge">app</code> folder.</p>
+
+<p>Open a new file named <code class="language-plaintext highlighter-rouge">app.ino</code> and create a bare bones program:</p>
+
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">void</span> <span class="nf">setup</span><span class="p">()</span> <span class="p">{</span>
+<span class="p">}</span>
+
+<span class="kt">void</span> <span class="nf">loop</span><span class="p">()</span> <span class="p">{</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>At this point the Arduino extension should be installed in your VSCode, next you’ll need to configure it with your board, in the status bar the bottom, you should have the ability to select a board and a port. Select <code class="language-plaintext highlighter-rouge">NodeMCU 1.0</code> and the <code class="language-plaintext highlighter-rouge">cu.wchusbserial1420</code> serial port you used last time.</p>
+
+<p>In app.ino in VSCode, you should have a verify and upload button at the top right of the editor, next to the “Split Editor” option. Hit upload and watch your program find its way to the ESP8266. This is how we will upload code to our ESP8266 from here on out, so you can go ahead and close the Arduino IDE.</p>
+
+<p><img src="/images/serverless-iot-temperature-station/vscode-upload-buttons.png" alt="Verify and Compile buttons in VSCode" /></p>
+
+:ET

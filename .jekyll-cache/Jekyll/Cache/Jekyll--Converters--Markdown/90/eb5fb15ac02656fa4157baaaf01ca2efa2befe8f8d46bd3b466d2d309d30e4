@@ -1,0 +1,126 @@
+I"�/<p><a href="https://telegram.org/">Telegram</a> is a messaging client which focuses on speed and security, it has clients for the web, desktop (PC + Mac) and most mobile operating systems (Android, iOS and Windows Phone).</p>
+
+<p>It’s a highly extensible platform, it has several fully featured API, entirely cloud based, free to use, and open (even their <a href="https://core.telegram.org/schema">encryption schema</a> is published and open).</p>
+
+<p>A relatively new Telegram feature is the ability to create bots, a Telegram user, operated by software, which can respond to messages and other arbitrary events and send messages back to users who message or subscribe to the chat.</p>
+
+<p>I’m not going to go into any further details about what a bot is and how they work in this post, I’m going to assume you already know and just want to get stuck in building one! If you are interested in learning more, the <a href="https://telegram.org/blog/bot-revolution">Telegram documentation for the bot platform</a> is a fantastic resource.</p>
+
+<p>##Creating your bot</p>
+
+<p>In order to create your bot, you need to start a conversation with ‘The BotFather’. He will get you up and running with your bot in no time, he is your gateway to generating an API token and inputting extra metadata about what your bot does.</p>
+
+<p>In order to start your app, head over to https://telegram.me/botfather and begin a conversation with The BotFather.</p>
+
+<p>Upon opening your conversation you’ll be greeted with a list of commands.</p>
+
+<p><img src="/content/images/2016/02/botfather-welcome.png" alt="" /></p>
+
+<p>Commands are used to allow us to instruct a bot to do something, they’re provided by the bots developer and brought together really well inside the Telegram interface automatically.</p>
+
+<p>Lets get started and issue the <code class="language-plaintext highlighter-rouge">/newbot</code> command:</p>
+
+<p><img src="/content/images/2016/02/newbot-name.png" alt="" /></p>
+
+<p>At this stage, The BotFather just wants a name for our bot, it’s what the user will see when they’re in a chat with our bot. In this article we’re going to build a bot which will notify subscribers when a Reddit <a href="https://www.reddit.com/r/programming">/r/programming</a> top story changes, so let’s call this bot <code class="language-plaintext highlighter-rouge">r/programming latest</code>.</p>
+
+<p><img src="/content/images/2016/02/programming-latest.png" alt="" /></p>
+
+<p>Now we need to specify a username for our bot, this is how users will search for our bot, it has to be unique and end in <code class="language-plaintext highlighter-rouge">Bot</code>, I’m going to go for <code class="language-plaintext highlighter-rouge">RedditProgrammingBot</code>, you won’t be able to register this name, if you’re following along, choose a different one.</p>
+
+<p><img src="/content/images/2016/02/created-bot.png" alt="" /></p>
+
+<p>You’ll notice at this stage we’ve been provided with an API token, our bot setup is complete!</p>
+
+<p>Click the <code class="language-plaintext highlighter-rouge">telegram.me</code> link in the success message to open a chat with your bot, once in the chat, hit the <code class="language-plaintext highlighter-rouge">Start</code> button.</p>
+
+<p><img src="/content/images/2016/02/bot-chat.png" alt="" /></p>
+
+<p>##Interacting with the API</p>
+
+<p>Telegram bots are interacted with over a REST HTTP API, we’re going to be using a npm module to interact with this API, but I think it’s worthwhile understanding how things work ‘under the hood’, so we’re going to take a whistle stop tour looking at the basics of the API.</p>
+
+<p>First things first, the base url for the bot API is https://api.telegram.org/, if you attempt to access a resource that doesn’t exist or you’re not authenticated - you’ll be re-directed back to the bot documentation.</p>
+
+<p>In order to authenticate with the API, you’ll need to specify your API token in the request, this is done simply as a HTTP parameter, you’ll need to remember to also place the keyword ‘bot’ at the front of the token, your URL should then look something like https://api.telegram.org/bot11:zz/ where <code class="language-plaintext highlighter-rouge">11:zz</code> is your API token.</p>
+
+<p>Finally, in order to have a valid API call, we need to specify a valid API method. The API provides a way to get information about a bot, it’s the <code class="language-plaintext highlighter-rouge">getMe</code> command, putting all of the URL scheme together, we get https://api.telegram.org/bot11:zz/getMe.</p>
+
+<p>Try hitting this endpoint in a browser with a real API token, you should see a JSON document returned similar to:</p>
+
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+  </span><span class="err">ok:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w">
+  </span><span class="err">result:</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="err">id:</span><span class="w"> </span><span class="mi">111111</span><span class="p">,</span><span class="w">
+    </span><span class="err">first_name:</span><span class="w"> </span><span class="s2">"r/programming latest"</span><span class="p">,</span><span class="w">
+    </span><span class="err">username:</span><span class="w"> </span><span class="s2">"RedditProgrammingBot"</span><span class="w">
+  </span><span class="p">}</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+
+<p>If something went wrong, or you were re-directed back to the bot API documentation, consult the <a href="https://core.telegram.org/bots/api#making-requests">Making Requests</a> section of the bot documentation and see if you can spot what’s gone wrong. My first suggestion would be ensuring your API token and the URL schema is correct.</p>
+
+<p>Now we are able to communicate with the HTTP API, we can do some really useful stuff, like reading messages sent to our bot!</p>
+
+<p>Send a message to your bot to start with, nothing fancy, a <code class="language-plaintext highlighter-rouge">Hello World</code> will suffice. You’ll get no response and your bot will sit there, silent.</p>
+
+<p>We now need to turn our attention to the <code class="language-plaintext highlighter-rouge">getUpdates</code> method within the API. This endpoint will simply return you new updates that have happened since the last time we acknowledged a series of updates.</p>
+
+<p>Updates are stored on the Telegram servers for 24 hours, if your backend doesn’t pick up an update within those 24 hours, it’ll be lost.</p>
+
+<p>Go ahead and hit the endpoint https://api.telegram.org/bot11:zz/getUpdates, again replacing the API key with yours.</p>
+
+<p>You should see a JSON document returned similar to the following:</p>
+
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+    </span><span class="err">ok:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w">
+    </span><span class="err">result:</span><span class="w"> </span><span class="p">[</span><span class="w">
+        </span><span class="p">{</span><span class="w">
+        </span><span class="err">update_id:</span><span class="w"> </span><span class="mi">578313191</span><span class="p">,</span><span class="w">
+        </span><span class="err">message:</span><span class="w"> </span><span class="p">{</span><span class="w">
+            </span><span class="err">message_id:</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w">
+            </span><span class="err">from:</span><span class="w"> </span><span class="p">{</span><span class="w">
+                </span><span class="err">id:</span><span class="w"> </span><span class="mi">1111</span><span class="p">,</span><span class="w">
+                </span><span class="err">first_name:</span><span class="w"> </span><span class="s2">"Jacob"</span><span class="p">,</span><span class="w">
+                </span><span class="err">last_name:</span><span class="w"> </span><span class="s2">"Clark"</span><span class="p">,</span><span class="w">
+                </span><span class="err">username:</span><span class="w"> </span><span class="s2">"imjacobclark"</span><span class="w">
+            </span><span class="p">},</span><span class="w">
+            </span><span class="err">chat:</span><span class="w"> </span><span class="p">{</span><span class="w">
+                </span><span class="err">id:</span><span class="w"> </span><span class="mi">1111</span><span class="p">,</span><span class="w">
+                </span><span class="err">first_name:</span><span class="w"> </span><span class="s2">"Jacob"</span><span class="p">,</span><span class="w">
+                </span><span class="err">last_name:</span><span class="w"> </span><span class="s2">"Clark"</span><span class="p">,</span><span class="w">
+                </span><span class="err">username:</span><span class="w"> </span><span class="s2">"imjacobclark"</span><span class="p">,</span><span class="w">
+                </span><span class="err">type:</span><span class="w"> </span><span class="s2">"private"</span><span class="w">
+            </span><span class="p">},</span><span class="w">
+            </span><span class="err">date:</span><span class="w"> </span><span class="mi">1456273350</span><span class="p">,</span><span class="w">
+            </span><span class="err">text:</span><span class="w"> </span><span class="s2">"Hello World!"</span><span class="w">
+            </span><span class="p">}</span><span class="w">
+        </span><span class="p">}</span><span class="w">
+    </span><span class="p">]</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+
+<p>Lovely, a payload of information about the message we just sent to our bot!</p>
+
+<p>Refresh the endpoint, you’ll notice the same response is returned, interesting, so how does the API know when we’ve acknowledged the update?</p>
+
+<p>Simple, we simply pass a query parameter of <code class="language-plaintext highlighter-rouge">offset</code> to the <code class="language-plaintext highlighter-rouge">getUpdates</code> method with the ID of the update we want to acknowledge, incremented by 1.</p>
+
+<p>The ID of the particular message we want to acknowledge above is <code class="language-plaintext highlighter-rouge">578313191</code>, which means we would need to send a parameter with an offset ID of <code class="language-plaintext highlighter-rouge">578313192</code> in order to remove it from the getUpdates response.</p>
+
+<p>https://api.telegram.org/bot11:zz/getUpdates?offset=578313192.</p>
+
+<p>As there are no other messages waiting to be acknowledged, you should be returned a similar response to:</p>
+
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+    </span><span class="nl">"ok"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"result"</span><span class="p">:</span><span class="w"> </span><span class="p">[]</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+
+<p>If you don’t, something has gone wrong, check over your URL and if in doubt, consult the <a href="https://core.telegram.org/bots/api#getupdates">Get  Updates</a> documentation.</p>
+
+<p>For the scope of this blog post, I’m not going to suggest we interact with the API endpoints directly, instead I suggest we the <a href="https://github.com/yagop/node-telegram-bot-api">https://github.com/yagop/node-telegram-bot-api</a> npm module, it’s actively maintained and the source code is very easily to follow and understand, so a great starting point to our application.</p>
+
+<p>##Bringing the bot online</p>
+:ET

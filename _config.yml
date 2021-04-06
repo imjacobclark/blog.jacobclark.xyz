@@ -14,8 +14,8 @@
 # You can create any custom variable you would like, and they will be accessible
 # in the templates via {{ site.myvariable }}.
 title: Jacob Clark - Blog
-email: jacob.jh.clark@googlemail.com
-description: "Experienced technologist and polyglot software engineer currently working at the BBC."
+email: jacob.jh.clark@gmail.com
+description: "Experienced technologist and polyglot software engineer"
 baseurl: "" # the subpath of your site, e.g. /blog
 url: "https://blog.jacobclark.xyz" # the base hostname & protocol for your site
 twitter_username: imjacobclark
@@ -25,3 +25,6 @@ permalink: /:title
 # Build settings
 markdown: kramdown
 theme: minima
+
+plugins:
+  - jekyll-sitemap

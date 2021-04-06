@@ -1,0 +1,240 @@
+I"q;<h1 id="big-o-notation">Big-O Notation</h1>
+
+<p>Asymptotic notation is a set of languages which allow us to express the performance of our algorithms in relation to their input.</p>
+
+<p>There are three main notations for expressing the performance of algorithms, put simply they are:</p>
+
+<ul>
+  <li>Big-O - The worst case (upper bound).</li>
+  <li>Big Omega - The best case (lower bound).</li>
+  <li>Theta - The upper and lower bounds.</li>
+</ul>
+
+<p>In this post I’m going to focus on how we can prove Big-O - as we often want to plan for the worst case running time of software, rather than the best.</p>
+
+<h2 id="big-o-through-code">Big-O through code</h2>
+
+<p>Lets take the following Python example which takes an array, iterates over it and prints each value of that array:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>def print_values(array):
+	for i in array:
+    	print i
+</code></pre></div></div>
+
+<p>We could put a timer at the beginning and the end of the line of code which calls this function, lets say our input is <code class="language-plaintext highlighter-rouge">[1, 2, 3, 4, 5]</code>, this would then give us the <code class="language-plaintext highlighter-rouge">running time</code> of our algorithm, right?</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>start = time.time()
+print_values([1, 2, 3, 4, 5])
+end = time.time()
+print(end - start)
+</code></pre></div></div>
+
+<p>Maybe, but what if you run it again, three times, write down your results and then move to another machine with a higher spec and run it another three times. I bet upon comparison of the results you will get different running times!</p>
+
+<p>This is where asymptotic notations are important. They provide us with a mathematical foundation for representing the running time of our algorithms consistently.</p>
+
+<p>We create this consistency by talking about operations our code has to perform. Operations such as array lookups, print statements and variable assignments.</p>
+
+<p>If we were to annotate <code class="language-plaintext highlighter-rouge">print_values</code> with the amount of times each line within the function is executed for the input <code class="language-plaintext highlighter-rouge">[1, 2, 3, 4, 5]</code>, we would have something as follows:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>def print_values(array):
+	for i in array: # Execution count: 5
+    	print i # Execution count: 1
+</code></pre></div></div>
+
+<p>If we were to change the input to an array of a different size, our print statement would be exercised more or less, depending on the size of that input.</p>
+
+<p>If we were to put this into an arithmetic expression, we would get <code class="language-plaintext highlighter-rouge">5+1</code>, using intuition we know that the 5 is variable on the input size, if we call the input size <code class="language-plaintext highlighter-rouge">n</code>, we would now have the expression <code class="language-plaintext highlighter-rouge">n+1</code>.</p>
+
+<p>I could now argue that the worst case running time for <code class="language-plaintext highlighter-rouge">print_values</code> is <code class="language-plaintext highlighter-rouge">O(n+1)</code>. <code class="language-plaintext highlighter-rouge">n</code> for the loop block and <code class="language-plaintext highlighter-rouge">1</code> for the print statement. Clearly this is oversimplified and taken at face value as I’m not <em>really</em> interested in <em>how</em> this code is being executed under the hood, I just care about the operations defined solely within my above function.</p>
+
+<p>In the grand scheme of things, the constant value <code class="language-plaintext highlighter-rouge">1</code> is pretty insignificant at the side of the variable value <code class="language-plaintext highlighter-rouge">n</code>. So we simply reduce the above expression to <code class="language-plaintext highlighter-rouge">O(n)</code>, and there we have our Big-O running time of <code class="language-plaintext highlighter-rouge">print_values</code>.</p>
+
+<p>As our code prints each and every value from the input array, it must in turn look at each value within that array in order to print it, as the loop is the most significant part of the code, we are able to say that our code is of running time <code class="language-plaintext highlighter-rouge">O(n)</code> where <code class="language-plaintext highlighter-rouge">n</code> is the variable length of the array! <strong>Simples!</strong></p>
+
+<p>An algorithm of running time <code class="language-plaintext highlighter-rouge">O(n)</code> is said to be linear, which essentially means the algorithms running time will increase linearly with its input (<code class="language-plaintext highlighter-rouge">n</code>).</p>
+
+<h2 id="proving-big-o">Proving Big-o</h2>
+
+<p>We can prove, mathematically, that <code class="language-plaintext highlighter-rouge">print_values</code> is in-fact <code class="language-plaintext highlighter-rouge">O(n)</code>, which brings us on to the formal definition for Big-O:</p>
+
+<p><strong>f(n) = O(g(n))</strong> if <strong>c</strong> and some initial value <strong>k</strong> are positive when <strong>f(n) &lt;= c * g(n) for all n &gt; k</strong> is true.</p>
+
+<p>We can turn this formal definition into an actual definition of our above code, which we can then in turn prove.</p>
+
+<p>We must first ask does <code class="language-plaintext highlighter-rouge">print_values</code> have a running time of <code class="language-plaintext highlighter-rouge">O(n)</code>?</p>
+
+<p>If <code class="language-plaintext highlighter-rouge">print_values &lt;= c n</code>, when <code class="language-plaintext highlighter-rouge">c</code> = 1 then <code class="language-plaintext highlighter-rouge">print_values</code> <strong>does</strong> have a running time of <code class="language-plaintext highlighter-rouge">O(n)</code> when <code class="language-plaintext highlighter-rouge">n &gt; k</code>.</p>
+
+<p><code class="language-plaintext highlighter-rouge">c</code> can be any integer while <code class="language-plaintext highlighter-rouge">k</code> is the amount of iterations we must perform for the expression to be true for every subsequent value of <code class="language-plaintext highlighter-rouge">n</code>.</p>
+
+<p>As <code class="language-plaintext highlighter-rouge">c</code> is just <code class="language-plaintext highlighter-rouge">1</code>, we can simplify our expression to <code class="language-plaintext highlighter-rouge">print_values &lt;= n</code>.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>n</th>
+      <th>f(n)</th>
+      <th>g(n)</th>
+      <th>True/False</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>False</td>
+    </tr>
+    <tr>
+      <td>1</td>
+      <td>1</td>
+      <td>1</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <td>2</td>
+      <td>2</td>
+      <td>2</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <td>3</td>
+      <td>3</td>
+      <td>3</td>
+      <td>True</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>We can see that <code class="language-plaintext highlighter-rouge">n</code> must be greater than the value <code class="language-plaintext highlighter-rouge">0</code> of constant <code class="language-plaintext highlighter-rouge">k</code> in order to satisfy the expression <code class="language-plaintext highlighter-rouge">print_values &lt;= n</code>.</p>
+
+<p>We can now say when <code class="language-plaintext highlighter-rouge">n</code> is <code class="language-plaintext highlighter-rouge">1</code>: <strong>1 &lt;= 1 * 1 for 1 &gt; 0</strong> is true. We know this because <code class="language-plaintext highlighter-rouge">1</code> multiplied by <code class="language-plaintext highlighter-rouge">1</code> is <code class="language-plaintext highlighter-rouge">1</code> and <code class="language-plaintext highlighter-rouge">1</code> is greater than our constant <code class="language-plaintext highlighter-rouge">k</code> which was <code class="language-plaintext highlighter-rouge">0</code>.</p>
+
+<p>The above must be true for all values of <code class="language-plaintext highlighter-rouge">n</code> greater than <code class="language-plaintext highlighter-rouge">k</code> <em>(0)</em>, so if <code class="language-plaintext highlighter-rouge">n</code> was <code class="language-plaintext highlighter-rouge">10</code>: <strong>10 &lt;= 1 * 10 for 10 &gt; 0</strong> is also true.</p>
+
+<p>What we’re basically saying here is that no matter our input (<code class="language-plaintext highlighter-rouge">n</code>), it must be greater than or equal to our constant (<code class="language-plaintext highlighter-rouge">c</code>) when the size of our input (<code class="language-plaintext highlighter-rouge">n</code>) is more than another constant value (<code class="language-plaintext highlighter-rouge">k</code>), in our case the iteration count of the function).</p>
+
+<p>But where do our constants come from? Well they are just values, we typically start at 1 and work our way up to seek a constant which makes the expression <strong>f(n) &lt;= c * g(n) for all n &gt; k</strong> true. If we cannot find such combination of constants, then our code does not have a running time of <code class="language-plaintext highlighter-rouge">O(n)</code> and our hypothesise was incorrect.</p>
+
+<h2 id="disproving-big-o">Disproving Big-O</h2>
+
+<p>Lets take a new Python example which takes an array, iterates over it and then prints the array value as many times as the arrays length.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>def print_values_with_repeat(array):
+	for i in array:
+		for x in range(0, len(array)):
+    		print i
+</code></pre></div></div>
+
+<p>If we were to annotate <code class="language-plaintext highlighter-rouge">print_values_with_repeat</code> with the amount of times each line within the function is executed for the input <code class="language-plaintext highlighter-rouge">[1, 2, 3, 4, 5]</code>, we would have something as follows:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>def print_values_with_repeat(array):
+	for i in array: # Execution count: 5
+		for x in range(0, len(array)): # Execution count: 25
+    		print i # Execution count: 1
+</code></pre></div></div>
+
+<p>Does <code class="language-plaintext highlighter-rouge">print_values_with_repeat</code> have a running time of <code class="language-plaintext highlighter-rouge">O(n)</code>?</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>n</th>
+      <th>f(n)</th>
+      <th>g(n)</th>
+      <th>True/False</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>False</td>
+    </tr>
+    <tr>
+      <td>1</td>
+      <td>1</td>
+      <td>1</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <td>2</td>
+      <td>4</td>
+      <td>2</td>
+      <td>False</td>
+    </tr>
+    <tr>
+      <td>3</td>
+      <td>9</td>
+      <td>3</td>
+      <td>False</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Suppose our constant <code class="language-plaintext highlighter-rouge">c</code> is <code class="language-plaintext highlighter-rouge">1</code>, <strong>1 &lt;= 1 * 1 for 1 &gt; 0</strong>, this is true - however our definition says that <code class="language-plaintext highlighter-rouge">g(n)</code> must be greater than all values of <code class="language-plaintext highlighter-rouge">f(n)</code>.</p>
+
+<p>So if we take the value <code class="language-plaintext highlighter-rouge">2</code> of <code class="language-plaintext highlighter-rouge">n</code> <strong>2 &lt;= 1 * 4 for 1 &gt; 0</strong>, we can see that this is now false, which disproves our hypothesis that <code class="language-plaintext highlighter-rouge">print_values_with_repeat</code> is <code class="language-plaintext highlighter-rouge">O(n)</code>. Even if we change our constant <code class="language-plaintext highlighter-rouge">c</code> to <code class="language-plaintext highlighter-rouge">2</code>, this would still prove false <em>eventually</em>.</p>
+
+<p>We can actually see that the order of growth in operations in <code class="language-plaintext highlighter-rouge">print_values_with_repeat</code> is actually <code class="language-plaintext highlighter-rouge">n^2</code>, so let’s hypothesise now that <code class="language-plaintext highlighter-rouge">print_values_with_repeat</code> is actually <code class="language-plaintext highlighter-rouge">O(n^2)</code>.</p>
+
+<p>Does <code class="language-plaintext highlighter-rouge">print_values_with_repeat</code> have a running time of <code class="language-plaintext highlighter-rouge">O(n^2)</code>?</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>n</th>
+      <th>f(n)</th>
+      <th>g(n^2)</th>
+      <th>True/False</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>False</td>
+    </tr>
+    <tr>
+      <td>1</td>
+      <td>1</td>
+      <td>1</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <td>2</td>
+      <td>4</td>
+      <td>4</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <td>3</td>
+      <td>9</td>
+      <td>9</td>
+      <td>True</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Suppose our constant <code class="language-plaintext highlighter-rouge">c</code> is still <code class="language-plaintext highlighter-rouge">1</code>, our expression would now be <strong>3 &lt;= 3 * 3^2 for 3 &gt; 0</strong>, this is true, great! <code class="language-plaintext highlighter-rouge">print_values_with_repeat</code> is in-fact <code class="language-plaintext highlighter-rouge">O(n^2)</code>.</p>
+
+<p><code class="language-plaintext highlighter-rouge">O(n^2)</code> is a quadratic time algorithm, as the running time of the algorithm increases quadratically to the input.</p>
+
+<h2 id="where-to-next">Where to next</h2>
+
+<p>There are some fantastic resources on the web to further your understanding on asymptotic notation, here are a few:</p>
+
+<ul>
+  <li><a href="https://www.youtube.com/watch?v=ei-A_wy5Yxw&amp;list=PL1BaGV1cIH4UhkL8a9bJGG356covJ76qN&amp;index=2">Big Oh Notation (and Omega and Theta) (Video)</a></li>
+  <li><a href="https://learnxinyminutes.com/docs/asymptotic-notation/">Asymptotic Notations - Learn X in Y</a></li>
+  <li><a href="https://www.khanacademy.org/computing/computer-science/algorithms">Khan Academy - Algorithms</a></li>
+  <li><a href="http://bigocheatsheet.com/">Big-O cheatsheet</a></li>
+</ul>
+
+<p>Found something inaccurate or incorrect, <a href="https://github.com/imjacobclark/blog.jacobclark.xyz/blob/master/_posts/2017-02-20-big-o-explained.markdown">please submit a pull request</a>, all improvements will be attributed accordingly.</p>
+
+<p>Visit my <a href="https://www.jacobclark.xyz">website</a>, follow me on <a href="https://twitter.com/imjacobclark">Twitter</a> and <a href="https://github.com/imjacobclark">GitHub</a> or view my professional background on <a href="https://uk.linkedin.com/in/imjacobclark">LinkedIn</a>.</p>
+:ET
